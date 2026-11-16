@@ -75,6 +75,38 @@
             }
             response.sendRedirect("gdChonMonOnline.jsp?dishName=" + java.net.URLEncoder.encode(dishName, "UTF-8") + "&categoryId=" + categoryId);
             return;
+        } else if ("addCombo".equals(act)) {
+            int comboId = 0;
+            try { comboId = Integer.parseInt(request.getParameter("comboId")); } catch (Exception ignored) {}
+            Combo cb = new ComboDAO().getComboById(comboId);
+            if (cb != null && cb.getDsComboDish() != null) {
+                int added = 0;
+                for (ComboDish cd : cb.getDsComboDish()) {
+                    Dish d = cd.getDish();
+                    if (d != null && "Đang phục vụ".equalsIgnoreCase(d.getStatus())) {
+                        boolean existed = false;
+                        for (OrderedDish item : dsMonDaGoi) {
+                            if (item.getDish().getId() == d.getId()) {
+                                item.setQuantity(Math.min(100, item.getQuantity() + cd.getQuantity()));
+                                existed = true;
+                                break;
+                            }
+                        }
+                        if (!existed) {
+                            OrderedDish od = new OrderedDish();
+                            od.setDish(d);
+                            od.setQuantity(cd.getQuantity());
+                            od.setPrice(d.getPrice());
+                            od.setNote("Combo: " + cb.getName());
+                            dsMonDaGoi.add(od);
+                        }
+                        added++;
+                    }
+                }
+                session.setAttribute("cartMsg", "Đã thêm trọn gói Combo \"" + cb.getName() + "\" (" + added + " món) vào đơn.");
+            }
+            response.sendRedirect("gdChonMonOnline.jsp?dishName=" + java.net.URLEncoder.encode(dishName, "UTF-8") + "&categoryId=" + categoryId);
+            return;
         } else if ("update".equals(act)) {
             int dishId = 0;
             int qty = 1;
@@ -114,6 +146,7 @@
 
     ArrayList<Category> listCategory = new CategoryDAO().getAllCategories();
     ArrayList<Dish> listMonTimThay = dishDAO.searchDish(dishName, categoryId);
+    ArrayList<Combo> listCombos = new ComboDAO().getAllCombos();
 
     float totalAmount = 0f;
     for (OrderedDish item : dsMonDaGoi) {
@@ -170,6 +203,21 @@
                 </select>
                 <button type="submit" class="btn btn-primary">Tìm món</button>
             </form>
+
+            <% if (!listCombos.isEmpty()) { %>
+            <form action="gdChonMonOnline.jsp" method="post" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid #e5e7eb; margin-bottom:14px;">
+                <input type="hidden" name="act" value="addCombo">
+                <input type="hidden" name="dishName" value="<%= FormatUtil.escapeHtml(dishName) %>">
+                <input type="hidden" name="categoryId" value="<%= categoryId %>">
+                <span style="font-size:13px; font-weight:600; color:#7c2d12;">Thêm nhanh Combo:</span>
+                <select class="form-control" name="comboId" style="flex:1; min-width:200px; padding:6px 10px; font-size:13px;">
+                    <% for (Combo cb : listCombos) { %>
+                        <option value="<%= cb.getId() %>"><%= FormatUtil.escapeHtml(cb.getName()) %> (<%= FormatUtil.formatCurrency(cb.getTotalPrice()) %> - Giảm <%= Math.round(cb.getDiscountRate()) %>%)</option>
+                    <% } %>
+                </select>
+                <button type="submit" class="btn btn-success btn-sm">+ Thêm Combo</button>
+            </form>
+            <% } %>
 
             <% if (listMonTimThay.isEmpty()) { %>
                 <div class="alert alert-info">Không tìm thấy món ăn nào phù hợp. Vui lòng thử từ khóa hoặc loại món khác.</div>

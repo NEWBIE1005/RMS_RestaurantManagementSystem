@@ -3,8 +3,8 @@ skinparam packageStyle rectangle
 skinparam monochrome true
 skinparam shadowing false
 skinparam linetype polyline
-skinparam nodesep 35
-skinparam ranksep 48
+skinparam nodesep 30
+skinparam ranksep 45
 
 title HÌNH 4.15: BIỂU ĐỒ THIẾT KẾ GÓI (PACKAGE DIAGRAM) TOÀN HỆ THỐNG RMS
 
@@ -23,17 +23,17 @@ package "webapp (View - JSP & CSS)" as pkg_view {
         [gdQuanLyCombo.jsp / gdThongKe.jsp]
         [gdThongBao.jsp]
     }
-    package "khachhang" {
-        [gdChinhKH.jsp]
-        [gdDatBan.jsp / doDatBan.jsp]
+    package "nvbh & datmon" {
+        [gdChinhNVBH.jsp]
         [gdTimBanDat.jsp]
         [gdChonMonOnline.jsp]
         [gdXacNhanGoiMon.jsp / doLuuGoiMon.jsp]
-        [gdTraCuuThucDon.jsp / gdLichSuDon.jsp]
         [gdThongBaoGoiMon.jsp]
     }
-    package "nvbh_nvkho" {
-        [gdChinhNVBH.jsp]
+    package "khachhang & kho" {
+        [gdChinhKH.jsp]
+        [gdDatBan.jsp / doDatBan.jsp]
+        [gdTraCuuThucDon.jsp / gdLichSuDon.jsp]
         [gdChinhNVKho.jsp]
     }
 }
@@ -44,18 +44,14 @@ package "com.rms.launcher & util" as pkg_launcher {
 }
 
 package "com.rms.dao (Data Access Objects)" as pkg_dao {
-    [DAO]
-    [UserDAO]
-    [CategoryDAO]
-    [DishDAO]
-    [TableDAO]
-    [ReservationDAO]
-    [OrderOnlineDAO]
-    [OrderedDishDAO]
-    [ComboDAO]
-    [BillDAO]
-    [WarehouseDAO]
-    [StatDAO]
+    [DAO / UserDAO / CustomerDAO]
+    [CategoryDAO / DishDAO / ComboDAO]
+    [TableDAO / ReservationDAO / BillDAO]
+    [OrderOnlineDAO / OrderedDishDAO]
+    [SupplierDAO / IngredientDAO]
+    [ImportReceiptDAO / ImportDetailDAO]
+    [DishStatDAO / IngredientStatDAO]
+    [CustomerStatDAO / SupplierStatDAO]
 }
 
 package "unittest (JUnit 4)" as pkg_test {
@@ -66,7 +62,7 @@ package "unittest (JUnit 4)" as pkg_test {
 }
 
 package "com.rms.model (Entities / JavaBeans)" as pkg_model {
-    [User / Staff / Customer]
+    [User / Staff / ManagementStaff / SaleStaff / WarehouseStaff / Customer]
     [Category / Dish / Combo / ComboDish]
     [Table / Reservation / OrderOnline / OrderedDish / Bill]
     [Ingredient / Supplier / ImportReceipt / ImportDetail]
@@ -82,6 +78,6 @@ pkg_test -down..> pkg_dao
 pkg_test -down..> pkg_model
 
 chung -[hidden]down-> nvql
-nvbh_nvkho -[hidden]down-> khachhang
+[nvbh & datmon] -[hidden]down-> [khachhang & kho]
 
 @enduml

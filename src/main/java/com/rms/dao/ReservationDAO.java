@@ -34,7 +34,7 @@ public class ReservationDAO extends DAO {
                 + "JOIN tblUser u ON c.userId = u.id "
                 + "JOIN tblTable t ON r.tableId = t.id "
                 + "WHERE (LOWER(u.fullName) LIKE LOWER(?) OR u.phone LIKE ?) "
-                + "AND r.status IN ('Chờ xác nhận', 'Đã xác nhận') "
+                + "AND r.status IN ('Chờ xác nhận', 'Đã xác nhận', 'Đang phục vụ') "
                 + "ORDER BY r.bookingTime ASC";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -156,10 +156,23 @@ public class ReservationDAO extends DAO {
     }
 
     /**
-     * Tạo đơn đặt bàn trực tuyến mới (tìm khách theo SĐT hoặc tạo khách mới nếu chưa có).
+     * Tạo đơn đặt bàn trực tuyến mới (tìm khách qua CustomerDAO hoặc tạo hồ sơ mới nếu chưa có).
      */
     public Reservation createReservation(String fullName, String phone, String email,
                                          int tableId, java.util.Date bookingTime, int guests, String note) {
+        return createReservationInternal(fullName, phone, email, tableId, bookingTime, guests, "Đã xác nhận", note, "Đã đặt");
+    }
+
+    /**
+     * NV Bán hàng đón tiếp và mở bàn phục vụ ngay cho khách vãng lai tại quầy.
+     */
+    public Reservation checkInWalkInTable(String fullName, String phone, int tableId, int guests, String note) {
+        return createReservationInternal(fullName, phone, "", tableId, new java.util.Date(), guests, "Đang phục vụ", note, "Đang phục vụ");
+    }
+
+    private Reservation createReservationInternal(String fullName, String phone, String email,
+                                                  int tableId, java.util.Date bookingTime, int guests,
+                                                  String resStatus, String note, String nextTableStatus) {
         if (fullName == null || fullName.trim().isEmpty()
                 || phone == null || phone.trim().isEmpty()
                 || tableId <= 0 || bookingTime == null || guests <= 0) {
@@ -176,62 +189,23 @@ public class ReservationDAO extends DAO {
             manageTransaction = con.getAutoCommit();
             if (manageTransaction) con.setAutoCommit(false);
 
-            String cleanPhone = phone.trim();
-            int customerUserId = -1;
-            String customerCode = "";
-            String membershipLevel = "Thành viên";
-            int rewardPoints = 0;
-
-            String sqlFindCus = "SELECT u.id, c.customerCode, c.membershipLevel, c.rewardPoints "
-                    + "FROM tblUser u JOIN tblCustomer c ON u.id = c.userId WHERE u.phone = ?";
-            try (PreparedStatement psFind = con.prepareStatement(sqlFindCus)) {
-                psFind.setString(1, cleanPhone);
-                try (ResultSet rs = psFind.executeQuery()) {
-                    if (rs.next()) {
-                        customerUserId = rs.getInt("id");
-                        customerCode = rs.getString("customerCode");
-                        membershipLevel = rs.getString("membershipLevel");
-                        rewardPoints = rs.getInt("rewardPoints");
-                    }
-                }
-            }
-
-            if (customerUserId <= 0) {
-                String guestUser = "guest_" + cleanPhone + "_" + (System.currentTimeMillis() % 10000);
-                String sqlUser = "INSERT INTO tblUser (username, password, fullName, phone, email, address, role) "
-                        + "VALUES (?, '123456', ?, ?, ?, '', 'CUSTOMER')";
-                try (PreparedStatement psU = con.prepareStatement(sqlUser, java.sql.Statement.RETURN_GENERATED_KEYS)) {
-                    psU.setString(1, guestUser);
-                    psU.setString(2, fullName.trim());
-                    psU.setString(3, cleanPhone);
-                    psU.setString(4, email != null ? email.trim() : "");
-                    psU.executeUpdate();
-                    try (ResultSet keys = psU.getGeneratedKeys()) {
-                        if (keys.next()) customerUserId = keys.getInt(1);
-                    }
-                }
-                if (customerUserId <= 0) {
-                    if (manageTransaction) con.rollback();
-                    return null;
-                }
-                customerCode = "KH" + String.format("%03d", customerUserId);
-                String sqlCus = "INSERT INTO tblCustomer (userId, customerCode, membershipLevel, rewardPoints) VALUES (?, ?, 'Thành viên', 0)";
-                try (PreparedStatement psC = con.prepareStatement(sqlCus)) {
-                    psC.setInt(1, customerUserId);
-                    psC.setString(2, customerCode);
-                    psC.executeUpdate();
-                }
+            CustomerDAO customerDAO = new CustomerDAO();
+            Customer cus = customerDAO.findOrCreateCustomer(fullName.trim(), phone.trim(), email);
+            if (cus == null) {
+                if (manageTransaction) con.rollback();
+                return null;
             }
 
             String sqlRes = "INSERT INTO tblReservation (customerId, tableId, bookingTime, numberOfGuests, status, note) "
-                    + "VALUES (?, ?, ?, ?, 'Đã xác nhận', ?)";
+                    + "VALUES (?, ?, ?, ?, ?, ?)";
             int resId = -1;
             try (PreparedStatement psR = con.prepareStatement(sqlRes, java.sql.Statement.RETURN_GENERATED_KEYS)) {
-                psR.setInt(1, customerUserId);
+                psR.setInt(1, cus.getId());
                 psR.setInt(2, tableId);
                 psR.setTimestamp(3, new java.sql.Timestamp(bookingTime.getTime()));
                 psR.setInt(4, guests);
-                psR.setString(5, note != null ? note.trim() : "");
+                psR.setString(5, resStatus);
+                psR.setString(6, note != null ? note.trim() : "");
                 psR.executeUpdate();
                 try (ResultSet keys = psR.getGeneratedKeys()) {
                     if (keys.next()) resId = keys.getInt(1);
@@ -242,16 +216,12 @@ public class ReservationDAO extends DAO {
                 return null;
             }
 
-            if (manageTransaction) con.commit();
+            if ("Đang phục vụ".equals(nextTableStatus) || "Trống".equalsIgnoreCase(table.getStatus())) {
+                tableDAO.updateTableStatus(tableId, nextTableStatus);
+                table.setStatus(nextTableStatus);
+            }
 
-            Customer cus = new Customer();
-            cus.setId(customerUserId);
-            cus.setFullName(fullName.trim());
-            cus.setPhone(cleanPhone);
-            cus.setEmail(email != null ? email.trim() : "");
-            cus.setCustomerCode(customerCode);
-            cus.setMembershipLevel(membershipLevel);
-            cus.setRewardPoints(rewardPoints);
+            if (manageTransaction) con.commit();
 
             Reservation res = new Reservation();
             res.setId(resId);
@@ -259,7 +229,7 @@ public class ReservationDAO extends DAO {
             res.setTable(table);
             res.setBookingTime(bookingTime);
             res.setNumberOfGuests(guests);
-            res.setStatus("Đã xác nhận");
+            res.setStatus(resStatus);
             res.setNote(note != null ? note.trim() : "");
             return res;
         } catch (Exception e) {

@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*,java.text.SimpleDateFormat,com.rms.dao.WarehouseDAO,com.rms.model.*,com.rms.util.FormatUtil"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*,java.text.SimpleDateFormat,com.rms.dao.*,com.rms.model.*,com.rms.util.FormatUtil"%>
 <%
     request.setCharacterEncoding("UTF-8");
     Staff nvkho = (Staff) session.getAttribute("nvkho");
@@ -7,7 +7,9 @@
         return;
     }
 
-    WarehouseDAO whDAO = new WarehouseDAO();
+    SupplierDAO supDAO = new SupplierDAO();
+    IngredientDAO ingDAO = new IngredientDAO();
+    ImportReceiptDAO recDAO = new ImportReceiptDAO();
     String msg = (String) session.getAttribute("whMsg");
     String err = (String) session.getAttribute("whErr");
     session.removeAttribute("whMsg");
@@ -25,7 +27,7 @@
             sup.setAddress(request.getParameter("address"));
             sup.setEmail(request.getParameter("email"));
             sup.setTaxCode(request.getParameter("taxCode"));
-            if (whDAO.addSupplier(sup)) {
+            if (supDAO.addSupplier(sup)) {
                 session.setAttribute("whMsg", "Đã thêm nhà cung cấp \"" + sup.getName() + "\".");
             } else {
                 session.setAttribute("whErr", "Vui lòng nhập đầy đủ Tên và Số điện thoại nhà cung cấp.");
@@ -57,7 +59,7 @@
             detail.setImportPrice(price);
             receipt.getDsChiTiet().add(detail);
 
-            if (whDAO.createImportReceipt(receipt)) {
+            if (recDAO.createImportReceipt(receipt)) {
                 session.setAttribute("whMsg", "Đã lập phiếu nhập " + receipt.getReceiptCode()
                         + " (" + FormatUtil.formatCurrency(receipt.getTotalAmount()) + ") và cộng tồn kho.");
             } else {
@@ -68,9 +70,9 @@
         }
     }
 
-    ArrayList<Ingredient> ingredients = whDAO.getAllIngredients();
-    ArrayList<Supplier> suppliers = whDAO.getAllSuppliers();
-    ArrayList<ImportReceipt> receipts = whDAO.getRecentReceipts();
+    ArrayList<Ingredient> ingredients = ingDAO.getAllIngredients();
+    ArrayList<Supplier> suppliers = supDAO.getAllSuppliers();
+    ArrayList<ImportReceipt> receipts = recDAO.getRecentReceipts();
 %>
 <!DOCTYPE html>
 <html lang="vi">

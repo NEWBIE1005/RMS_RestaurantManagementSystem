@@ -14,8 +14,9 @@ import com.rms.dao.*;
 import com.rms.model.*;
 
 /**
- * Bộ kiểm thử đơn vị JUnit 4 cho các DAO mở rộng (Dish CRUD, Table, Reservation, Combo, Stat, Warehouse, Bill).
- * Toàn bộ test case chạy trong Transaction và rollback sau mỗi lần chạy để bảo toàn dữ liệu mẫu.
+ * Bộ kiểm thử đơn vị JUnit 4 cho hệ thống DAO chuẩn thực thể mở rộng:
+ * UserDAO (đa hình Staff), CustomerDAO, DishDAO, TableDAO, ReservationDAO,
+ * ComboDAO, SupplierDAO, IngredientDAO, ImportReceiptDAO, BillDAO và 4 *StatDAO.
  */
 public class TestExtendedDAOs extends DAO {
 
@@ -36,6 +37,15 @@ public class TestExtendedDAOs extends DAO {
             con.rollback();
             con.setAutoCommit(true);
         }
+    }
+
+    @Test
+    public void testRolePolymorphismOnLogin() {
+        UserDAO userDAO = new UserDAO();
+        assertTrue(userDAO.checkLogin("ql01", "123456") instanceof ManagementStaff);
+        assertTrue(userDAO.checkLogin("bh01", "123456") instanceof SaleStaff);
+        assertTrue(userDAO.checkLogin("kho01", "123456") instanceof WarehouseStaff);
+        assertTrue(userDAO.checkLogin("kh01", "123456") instanceof Customer);
     }
 
     @Test
@@ -76,6 +86,37 @@ public class TestExtendedDAOs extends DAO {
     }
 
     @Test
+    public void testWalkInReceptionAndBillPaymentReleasesTable() {
+        ReservationDAO resDAO = new ReservationDAO();
+        OrderOnlineDAO ordDAO = new OrderOnlineDAO();
+        BillDAO billDAO = new BillDAO();
+        TableDAO tableDAO = new TableDAO();
+
+        Reservation walkIn = resDAO.checkInWalkInTable("Khách Vãng Lai", "0908887776", 1, 3, "Ăn tại bàn");
+        assertNotNull(walkIn);
+        assertEquals("Đang phục vụ", walkIn.getStatus());
+        assertEquals("Đang phục vụ", tableDAO.getTableById(1).getStatus());
+
+        Dish d = new DishDAO().getDishById(1);
+        OrderedDish item = new OrderedDish();
+        item.setDish(d);
+        item.setQuantity(2);
+        item.setPrice(d.getPrice());
+
+        OrderOnline ord = new OrderOnline();
+        ord.setOrderCode("ORD-TEST-BILL-1");
+        ord.setReservation(walkIn);
+        ord.setDsMonGoi(new ArrayList<>());
+        ord.getDsMonGoi().add(item);
+
+        assertTrue(ordDAO.saveOrderOnline(ord));
+        Bill bill = billDAO.createPaymentBill(ord.getId(), 2, 10000f, "Chuyển khoản");
+        assertNotNull("Lập hóa đơn thanh toán thành công", bill);
+        assertEquals(d.getPrice() * 2f - 10000f, bill.getFinalAmount(), 1.0f);
+        assertEquals("Trống", tableDAO.getTableById(1).getStatus());
+    }
+
+    @Test
     public void testCreateComboCalculatesDiscountedTotal() {
         ComboDAO comboDAO = new ComboDAO();
         DishDAO dishDAO = new DishDAO();
@@ -102,17 +143,21 @@ public class TestExtendedDAOs extends DAO {
     }
 
     @Test
-    public void testWarehouseImportReceiptUpdatesStock() {
-        WarehouseDAO whDAO = new WarehouseDAO();
-        ArrayList<Ingredient> beforeList = whDAO.getAllIngredients();
+    public void testImportReceiptAndDetailUpdateStock() {
+        IngredientDAO ingDAO = new IngredientDAO();
+        SupplierDAO supDAO = new SupplierDAO();
+        ImportReceiptDAO recDAO = new ImportReceiptDAO();
+
+        assertFalse(supDAO.getAllSuppliers().isEmpty());
+        ArrayList<Ingredient> beforeList = ingDAO.getAllIngredients();
         assertFalse(beforeList.isEmpty());
         Ingredient target = beforeList.get(0);
         float oldStock = target.getStockQuantity();
 
         ImportReceipt rec = new ImportReceipt();
         rec.setReceiptCode("PN-TEST-001");
-        Supplier sup = new Supplier(); sup.setId(1);
-        Staff st = new Staff(); st.setId(3);
+        Supplier sup = supDAO.getSupplierById(1);
+        WarehouseStaff st = new WarehouseStaff(); st.setId(3);
         rec.setSupplier(sup);
         rec.setStaff(st);
 
@@ -122,43 +167,16 @@ public class TestExtendedDAOs extends DAO {
         det.setImportPrice(200000f);
         rec.getDsChiTiet().add(det);
 
-        assertTrue("Lưu phiếu nhập kho phải thành công", whDAO.createImportReceipt(rec));
+        assertTrue("Lưu phiếu nhập kho phải thành công", recDAO.createImportReceipt(rec));
         assertEquals(2500000f, rec.getTotalAmount(), 1.0f);
-
-        ArrayList<Ingredient> afterList = whDAO.getAllIngredients();
-        assertEquals(oldStock + 12.5f, afterList.get(0).getStockQuantity(), 0.01f);
+        assertEquals(oldStock + 12.5f, ingDAO.getIngredientById(target.getId()).getStockQuantity(), 0.01f);
     }
 
     @Test
-    public void testStatQueriesExecuteCleanly() {
-        StatDAO statDAO = new StatDAO();
-        assertFalse(statDAO.getDishStatistics().isEmpty());
-        assertFalse(statDAO.getIngredientStatistics().isEmpty());
-        assertFalse(statDAO.getCustomerStatistics().isEmpty());
-        assertFalse(statDAO.getSupplierStatistics().isEmpty());
-    }
-
-    @Test
-    public void testBillPaymentUpdatesOrderAndPoints() {
-        OrderOnlineDAO ordDAO = new OrderOnlineDAO();
-        BillDAO billDAO = new BillDAO();
-        Reservation res = new Reservation(); res.setId(1);
-        Dish d = new DishDAO().getDishById(1);
-
-        OrderedDish item = new OrderedDish();
-        item.setDish(d);
-        item.setQuantity(2);
-        item.setPrice(d.getPrice());
-
-        OrderOnline ord = new OrderOnline();
-        ord.setOrderCode("ORD-TEST-BILL-1");
-        ord.setReservation(res);
-        ord.setDsMonGoi(new ArrayList<>());
-        ord.getDsMonGoi().add(item);
-
-        assertTrue(ordDAO.saveOrderOnline(ord));
-        Bill bill = billDAO.createPaymentBill(ord.getId(), 2, 10000f, "Chuyển khoản");
-        assertNotNull("Lập hóa đơn thanh toán thành công", bill);
-        assertEquals(d.getPrice() * 2f - 10000f, bill.getFinalAmount(), 1.0f);
+    public void testDedicatedStatDAOsExecuteCleanly() {
+        assertFalse(new DishStatDAO().getDishStatistics().isEmpty());
+        assertFalse(new IngredientStatDAO().getIngredientStatistics().isEmpty());
+        assertFalse(new CustomerStatDAO().getCustomerStatistics().isEmpty());
+        assertFalse(new SupplierStatDAO().getSupplierStatistics().isEmpty());
     }
 }

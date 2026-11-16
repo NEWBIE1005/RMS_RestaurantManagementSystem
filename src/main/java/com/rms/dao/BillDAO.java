@@ -11,7 +11,7 @@ import com.rms.model.Bill;
 import com.rms.model.Customer;
 import com.rms.model.OrderOnline;
 import com.rms.model.Reservation;
-import com.rms.model.Staff;
+import com.rms.model.SaleStaff;
 import com.rms.model.Table;
 
 /**
@@ -42,6 +42,7 @@ public class BillDAO extends DAO {
             String orderStatus;
             int reservationId;
             int customerId;
+            int tableId;
             try (PreparedStatement psO = con.prepareStatement(sqlOrder)) {
                 psO.setInt(1, orderId);
                 try (ResultSet rs = psO.executeQuery()) {
@@ -54,6 +55,7 @@ public class BillDAO extends DAO {
                     orderStatus = rs.getString("status");
                     reservationId = rs.getInt("reservationId");
                     customerId = rs.getInt("customerId");
+                    tableId = rs.getInt("tableId");
                 }
             }
 
@@ -96,21 +98,11 @@ public class BillDAO extends DAO {
                 psUpR.executeUpdate();
             }
 
+            new TableDAO().releaseTableIfIdle(tableId);
+
             int earnedPoints = (int) (finalAmount / 10000f);
             if (earnedPoints > 0) {
-                try (PreparedStatement psPts = con.prepareStatement(
-                        "UPDATE tblCustomer SET rewardPoints = rewardPoints + ?, "
-                        + "membershipLevel = CASE "
-                        + "  WHEN rewardPoints + ? >= 1500 THEN 'Vàng' "
-                        + "  WHEN rewardPoints + ? >= 500 THEN 'Bạc' "
-                        + "  ELSE membershipLevel END "
-                        + "WHERE userId = ?")) {
-                    psPts.setInt(1, earnedPoints);
-                    psPts.setInt(2, earnedPoints);
-                    psPts.setInt(3, earnedPoints);
-                    psPts.setInt(4, customerId);
-                    psPts.executeUpdate();
-                }
+                new CustomerDAO().addRewardPoints(customerId, earnedPoints);
             }
 
             if (manageTransaction) con.commit();
@@ -122,7 +114,7 @@ public class BillDAO extends DAO {
             ord.setId(orderId);
             ord.setOrderCode(orderCode);
             bill.setOrderOnline(ord);
-            Staff staff = new Staff();
+            SaleStaff staff = new SaleStaff();
             staff.setId(staffUserId);
             bill.setStaff(staff);
             bill.setPaymentTime(now);
@@ -185,7 +177,7 @@ public class BillDAO extends DAO {
                 o.setReservation(res);
                 b.setOrderOnline(o);
 
-                Staff st = new Staff();
+                SaleStaff st = new SaleStaff();
                 st.setFullName(rs.getString("staffName"));
                 b.setStaff(st);
                 list.add(b);

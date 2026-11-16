@@ -10,7 +10,8 @@
     ReservationDAO resDAO = new ReservationDAO();
     OrderOnlineDAO ordDAO = new OrderOnlineDAO();
     BillDAO billDAO = new BillDAO();
-    UserDAO userDAO = new UserDAO();
+    CustomerDAO customerDAO = new CustomerDAO();
+    TableDAO tableDAO = new TableDAO();
 
     String msg = (String) session.getAttribute("saleMsg");
     String err = (String) session.getAttribute("saleErr");
@@ -62,13 +63,30 @@
             String email = request.getParameter("email");
             String address = request.getParameter("address");
             String level = request.getParameter("level");
-            Customer c = userDAO.createMembershipCustomer(fullName, phone, email, address, level);
+            Customer c = customerDAO.createMembershipCustomer(fullName, phone, email, address, level);
             if (c != null) {
                 session.setAttribute("saleMsg", "Đã cấp thẻ thành viên " + c.getCustomerCode() + " cho khách " + c.getFullName() + ".");
             } else {
                 session.setAttribute("saleErr", "Số điện thoại đã tồn tại hoặc thông tin chưa hợp lệ.");
             }
             response.sendRedirect("gdChinhNVBH.jsp?tab=members");
+            return;
+        } else if ("walkin".equals(act)) {
+            String fullName = request.getParameter("fullName");
+            String phone = request.getParameter("phone");
+            String note = request.getParameter("note");
+            int tableId = 0;
+            int guests = 2;
+            try { tableId = Integer.parseInt(request.getParameter("tableId")); } catch (Exception ignored) {}
+            try { guests = Integer.parseInt(request.getParameter("guests")); } catch (Exception ignored) {}
+            Reservation seated = resDAO.checkInWalkInTable(fullName, phone, tableId, guests, note);
+            if (seated != null) {
+                session.setAttribute("saleMsg", "Đã đón tiếp khách " + seated.getCustomer().getFullName()
+                        + " vào " + seated.getTable().getTableNumber() + " (#RES-" + seated.getId() + ").");
+            } else {
+                session.setAttribute("saleErr", "Không thể mở bàn (kiểm tra sức chứa hoặc trùng lịch bàn).");
+            }
+            response.sendRedirect("gdChinhNVBH.jsp?tab=checkin");
             return;
         }
     }
@@ -105,6 +123,7 @@
             <a href="gdTimBanDat.jsp" class="btn btn-success">+ Đặt món Online cho bàn khách đặt</a>
             <a href="gdChinhNVBH.jsp?tab=orders" class="btn <%= "orders".equals(tab) ? "btn-primary" : "btn-secondary" %>">Đơn đặt món Online &amp; Thanh toán</a>
             <a href="gdChinhNVBH.jsp?tab=reservations" class="btn <%= "reservations".equals(tab) ? "btn-primary" : "btn-secondary" %>">Quản lý Đặt bàn</a>
+            <a href="gdChinhNVBH.jsp?tab=checkin" class="btn <%= "checkin".equals(tab) ? "btn-primary" : "btn-secondary" %>">Đón khách tại quầy</a>
             <a href="gdChinhNVBH.jsp?tab=bills" class="btn <%= "bills".equals(tab) ? "btn-primary" : "btn-secondary" %>">Hóa đơn đã thanh toán</a>
             <a href="gdChinhNVBH.jsp?tab=members" class="btn <%= "members".equals(tab) ? "btn-primary" : "btn-secondary" %>">Thẻ thành viên khách hàng</a>
         </div>
@@ -225,8 +244,49 @@
                     </tbody>
                 </table>
             <% } %>
+        <% } else if ("checkin".equals(tab)) {
+            ArrayList<Table> freeTables = tableDAO.getAvailableTables(1, new Date());
+        %>
+            <div class="split-layout">
+                <div>
+                    <h3>Đón tiếp khách vãng lai &amp; Mở bàn</h3>
+                    <form action="gdChinhNVBH.jsp?tab=checkin" method="post">
+                        <input type="hidden" name="act" value="walkin">
+                        <div class="form-group"><label>Họ và tên khách (*)</label><input class="form-control" type="text" name="fullName" required placeholder="Tên khách hàng..."></div>
+                        <div class="form-group"><label>Số điện thoại (*)</label><input class="form-control" type="text" name="phone" required placeholder="SĐT khách..."></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Số khách</label><input class="form-control" type="number" name="guests" value="2" min="1" max="20" required></div>
+                            <div class="form-group"><label>Chọn bàn trống</label>
+                                <select class="form-control" name="tableId" required>
+                                    <% for (Table t : freeTables) { %>
+                                        <option value="<%= t.getId() %>"><%= FormatUtil.escapeHtml(t.getTableNumber()) %> (Tầng <%= t.getFloor() %>, <%= t.getCapacity() %> chỗ)</option>
+                                    <% } %>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group"><label>Ghi chú</label><input class="form-control" type="text" name="note" placeholder="Khách ăn ngay tại bàn..."></div>
+                        <button type="submit" class="btn btn-primary" style="width:100%;" <%= freeTables.isEmpty() ? "disabled" : "" %>>Mở bàn phục vụ</button>
+                    </form>
+                </div>
+                <div>
+                    <h3>Sơ đồ trạng thái tất cả Bàn ăn</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Bàn</th><th>Tầng</th><th>Chỗ</th><th>Trạng thái</th></tr></thead>
+                        <tbody>
+                        <% for (Table t : tableDAO.getAllTables()) { %>
+                        <tr>
+                            <td><strong><%= FormatUtil.escapeHtml(t.getTableNumber()) %></strong></td>
+                            <td>Tầng <%= t.getFloor() %></td>
+                            <td><%= t.getCapacity() %></td>
+                            <td><span class="badge <%= "Trống".equals(t.getStatus()) ? "badge-success" : "badge-warn" %>"><%= FormatUtil.escapeHtml(t.getStatus()) %></span></td>
+                        </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         <% } else {
-            ArrayList<Customer> customers = userDAO.getAllCustomers();
+            ArrayList<Customer> customers = customerDAO.getAllCustomers();
         %>
             <div class="split-layout">
                 <div>

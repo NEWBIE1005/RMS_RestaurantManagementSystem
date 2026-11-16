@@ -105,6 +105,24 @@ public class TableDAO extends DAO {
         }
     }
 
+    /**
+     * Trả bàn về trạng thái 'Trống' khi hóa đơn đã thanh toán xong và không còn lượt đặt/ngồi ăn nào đang mở.
+     */
+    public boolean releaseTableIfIdle(int tableId) {
+        String sqlCheck = "SELECT COUNT(*) FROM tblReservation WHERE tableId = ? AND status IN ('Đã xác nhận', 'Đang phục vụ')";
+        try (PreparedStatement psC = con.prepareStatement(sqlCheck)) {
+            psC.setInt(1, tableId);
+            try (ResultSet rs = psC.executeQuery()) {
+                if (rs.next() && rs.getInt(1) == 0) {
+                    return updateTableStatus(tableId, "Trống");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private Table mapTable(ResultSet rs) throws Exception {
         Table t = new Table();
         t.setId(rs.getInt("id"));

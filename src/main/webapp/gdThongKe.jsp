@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*,com.rms.dao.StatDAO,com.rms.model.*,com.rms.util.FormatUtil"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*,com.rms.dao.*,com.rms.model.*,com.rms.util.FormatUtil"%>
 <%
     Staff nvql = (Staff) session.getAttribute("nvql");
     if (nvql == null) {
@@ -8,8 +8,6 @@
 
     String tab = request.getParameter("tab");
     if (tab == null || tab.isEmpty()) tab = "dish";
-
-    StatDAO statDAO = new StatDAO();
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -45,7 +43,7 @@
         </div>
 
         <% if ("dish".equals(tab)) {
-            ArrayList<DishStat> list = statDAO.getDishStatistics();
+            ArrayList<DishStat> list = new DishStatDAO().getDishStatistics();
             float grandTotal = 0f;
             int grandQty = 0;
             for (DishStat d : list) { grandTotal += d.getTotalRevenue(); grandQty += d.getTotalOrderedQty(); }
@@ -79,7 +77,7 @@
                 <span>Tổng doanh thu theo món: <%= FormatUtil.formatCurrency(grandTotal) %></span>
             </div>
         <% } else if ("ingredient".equals(tab)) {
-            ArrayList<IngredientStat> list = statDAO.getIngredientStatistics();
+            ArrayList<IngredientStat> list = new IngredientStatDAO().getIngredientStatistics();
         %>
             <table class="data-table">
                 <thead>
@@ -110,7 +108,7 @@
                 </tbody>
             </table>
         <% } else if ("customer".equals(tab)) {
-            ArrayList<CustomerStat> list = statDAO.getCustomerStatistics();
+            ArrayList<CustomerStat> list = new CustomerStatDAO().getCustomerStatistics();
         %>
             <table class="data-table">
                 <thead>
@@ -139,7 +137,7 @@
                 </tbody>
             </table>
         <% } else {
-            ArrayList<SupplierStat> list = statDAO.getSupplierStatistics();
+            ArrayList<SupplierStat> list = new SupplierStatDAO().getSupplierStatistics();
         %>
             <table class="data-table">
                 <thead>
