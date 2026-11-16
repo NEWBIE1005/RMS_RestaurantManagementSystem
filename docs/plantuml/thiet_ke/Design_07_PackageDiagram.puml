@@ -1,0 +1,73 @@
+@startuml Design_07_PackageDiagram
+skinparam packageStyle rectangle
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+
+title HÌNH 4.15: BIỂU ĐỒ THIẾT KẾ GÓI (PACKAGE DIAGRAM) TOÀN HỆ THỐNG RMS
+
+package "webapp (View - JSP & CSS)" as pkg_view {
+    package "chung" {
+        [gddangnhap.jsp]
+        [doDangnhap.jsp]
+    }
+    package "nvql" {
+        [gdChinhNVQL.jsp]
+        [gdQuanLyMonAn.jsp]
+        [gdTimKiemMonAn.jsp]
+        [gdSuaMonAn.jsp]
+        [doSuaMonAn.jsp]
+        [gdThongBao.jsp]
+    }
+    package "khachhang" {
+        [gdChinhKH.jsp]
+        [gdTimBanDat.jsp]
+        [gdChonMonOnline.jsp]
+        [gdXacNhanGoiMon.jsp]
+        [doLuuGoiMon.jsp]
+        [gdThongBaoGoiMon.jsp]
+    }
+}
+
+package "com.rms.dao (Data Access Objects)" as pkg_dao {
+    [DAO]
+    [UserDAO]
+    [CategoryDAO]
+    [DishDAO]
+    [ReservationDAO]
+    [OrderOnlineDAO]
+    [OrderedDishDAO]
+}
+
+package "com.rms.model (Entities / JavaBeans)" as pkg_model {
+    [User]
+    [Staff]
+    [Customer]
+    [Category]
+    [Dish]
+    [Combo]
+    [ComboDish]
+    [Table]
+    [Reservation]
+    [OrderOnline]
+    [OrderedDish]
+    [Bill]
+    [Ingredient]
+    [Supplier]
+    [ImportReceipt]
+    [ImportDetail]
+}
+
+package "unittest (JUnit 4)" as pkg_test {
+    [TestDishDAO]
+    [TestReservationDAO]
+    [TestOrderOnlineDAO]
+}
+
+pkg_view ..> pkg_dao
+pkg_view ..> pkg_model
+pkg_dao ..> pkg_model
+pkg_test ..> pkg_dao
+pkg_test ..> pkg_model
+
+@enduml

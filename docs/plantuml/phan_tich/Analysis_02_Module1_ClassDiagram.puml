@@ -1,0 +1,94 @@
+@startuml Analysis_02_Module1_ClassDiagram
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+title HÌNH 3.6: BIỂU ĐỒ LỚP PHA PHÂN TÍCH - MODULE 1: NV QUẢN LÝ SỬA THÔNG TIN MÓN ĂN
+
+class GDChinhNVQL <<boundary>> {
+    - subQLMonAn
+    - subTaoCombo
+    - subXemThongKe
+    - subDangXuat
+}
+
+class GDQuanLyMonAn <<boundary>> {
+    - inChucNang
+    - subTiepTuc
+    - subQuayLai
+}
+
+class GDTimKiemMonAn <<boundary>> {
+    - inTenMon
+    - subTimKiem
+    - outsubDSMonAn
+    - subQuayLai
+}
+
+class GDSuaMonAn <<boundary>> {
+    - inoutTenMon
+    - inoutGia
+    - inoutDonVi
+    - inoutTheLoai
+    - inoutMoTa
+    - inoutTrangThai
+    - subLuu
+    - subHuy
+    - outThongBao
+}
+
+class User <<entity>> {
+    - username
+    - password
+    - fullName
+    - phone
+    - email
+    - address
+    - role
+}
+
+class Staff <<entity>> {
+    - staffCode
+    - position
+    - salary
+}
+
+class ManagementStaff <<entity>> {
+}
+
+class Category <<entity>> {
+    - code
+    - name
+    - description
+    + getAllCategories()
+}
+
+class Dish <<entity>> {
+    - code
+    - name
+    - price
+    - unit
+    - description
+    - status
+    - image
+    + searchDishByName()
+    + getDishById()
+    + updateDish()
+}
+
+Staff --|> User
+ManagementStaff --|> Staff
+Category "1" -- "0..*" Dish
+
+GDChinhNVQL -right-> GDQuanLyMonAn
+GDQuanLyMonAn -right-> GDTimKiemMonAn
+GDTimKiemMonAn -right-> GDSuaMonAn
+
+GDChinhNVQL ..> ManagementStaff
+GDTimKiemMonAn ..> Dish
+GDSuaMonAn ..> Dish
+GDSuaMonAn ..> Category
+
+@enduml

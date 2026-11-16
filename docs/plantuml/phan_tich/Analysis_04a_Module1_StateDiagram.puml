@@ -1,0 +1,23 @@
+@startuml Analysis_04a_Module1_StateDiagram
+skinparam monochrome true
+skinparam shadowing false
+
+title HÌNH 3.9: BIỂU ĐỒ CHUYỂN TRẠNG THÁI MODULE 1 - SỬA THÔNG TIN MÓN ĂN
+
+state "Hiển thị GD Chính NV Quản lý" as S1
+state "Hiển thị GD Quản lý món ăn" as S2
+state "Hiển thị GD Tìm kiếm món ăn" as S3
+state "Hiển thị GD Sửa thông tin món ăn" as S4
+
+[*] --> S1 : Bắt đầu
+S1 --> S2 : [chọn menu Quản lý món ăn]
+S2 --> S1 : [chọn quay lại]
+S2 --> S3 : [chọn chức năng Sửa món ăn]
+S3 --> S2 : [chọn quay lại]
+S3 --> S3 : [nhập tên & tìm kiếm món]
+S3 --> S4 : [chọn 1 món ăn từ kết quả]
+S4 --> S3 : [chọn hủy / quay lại]
+S4 --> S4 : [nhập dữ liệu không hợp lệ]
+S4 --> [*] : [nhập hợp lệ & chọn Lưu thành công]
+
+@enduml

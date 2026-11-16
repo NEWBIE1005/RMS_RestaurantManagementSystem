@@ -1,0 +1,201 @@
+@startuml Design_04_Module2_ClassDiagram
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+title HÌNH 4.8: BIỂU ĐỒ LỚP THIẾT KẾ CHI TIẾT MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
+
+package "Tầng Giao diện (View - JSP)" {
+    class gdChinhKH_jsp <<boundary>> {
+        - linkDatMonOnline : link
+        - khachHang : Customer
+    }
+
+    class gdTimBanDat_jsp <<boundary>> {
+        - txtKeyword : text
+        - btnTimBan : submit
+        - tblBanDat : Table
+        - linkChonBan : link
+        - listBanDat : ArrayList<Reservation>
+    }
+
+    class gdChonMonOnline_jsp <<boundary>> {
+        - banDat : Reservation
+        - txtTenMon : text
+        - cbCategory : Select
+        - btnTimMon : submit
+        - tblMonTimThay : Table
+        - txtSoLuong : text
+        - btnThemMon : submit
+        - tblMonDaGoi : Table
+        - btnXacNhan : submit
+        - listCategory : ArrayList<Category>
+        - listMonTimThay : ArrayList<Dish>
+        - listMonDaGoi : ArrayList<OrderedDish>
+    }
+
+    class gdXacNhanGoiMon_jsp <<boundary>> {
+        - donGoiMon : OrderOnline
+        - txtGhiChu : textarea
+        - btnXacNhanLuu : submit
+        - btnQuayLai : link
+    }
+
+    class doLuuGoiMon_jsp <<boundary>> {
+        - donGoiMon : OrderOnline
+        - ketQua : boolean
+    }
+
+    class gdThongBaoGoiMon_jsp <<boundary>> {
+        - maDon : text
+        - thongBao : text
+        - btnOK : link
+    }
+}
+
+package "Tầng Truy xuất Dữ liệu (DAO)" {
+    class DAO <<dao>> {
+        # con : Connection
+        + DAO()
+    }
+
+    class ReservationDAO <<dao>> {
+        + ReservationDAO()
+        + searchBookedTables(keyword : String) : ArrayList<Reservation>
+        + getReservationById(id : int) : Reservation
+    }
+
+    class CategoryDAO <<dao>> {
+        + CategoryDAO()
+        + getAllCategories() : ArrayList<Category>
+    }
+
+    class DishDAO <<dao>> {
+        + DishDAO()
+        + searchDish(name : String, categoryId : int) : ArrayList<Dish>
+        + getDishById(id : int) : Dish
+    }
+
+    class OrderOnlineDAO <<dao>> {
+        + OrderOnlineDAO()
+        + saveOrderOnline(order : OrderOnline) : boolean
+    }
+
+    class OrderedDishDAO <<dao>> {
+        + OrderedDishDAO()
+        + saveOrderedDish(item : OrderedDish, orderId : int) : boolean
+    }
+}
+
+package "Tầng Thực thể (Model)" {
+    class User <<entity>> {
+        - id : int
+        - username : String
+        - password : String
+        - fullName : String
+        - phone : String
+        - email : String
+        - address : String
+        - role : String
+    }
+
+    class Customer <<entity>> {
+        - customerCode : String
+        - membershipLevel : String
+        - rewardPoints : int
+    }
+
+    class Table <<entity>> {
+        - id : int
+        - tableNumber : String
+        - capacity : int
+        - floor : int
+        - status : String
+        - description : String
+    }
+
+    class Reservation <<entity>> {
+        - id : int
+        - customer : Customer
+        - table : Table
+        - bookingTime : Date
+        - numberOfGuests : int
+        - status : String
+        - note : String
+    }
+
+    class Category <<entity>> {
+        - id : int
+        - code : String
+        - name : String
+        - description : String
+    }
+
+    class Dish <<entity>> {
+        - id : int
+        - code : String
+        - name : String
+        - price : float
+        - unit : String
+        - description : String
+        - status : String
+        - image : String
+        - category : Category
+    }
+
+    class OrderedDish <<entity>> {
+        - id : int
+        - dish : Dish
+        - quantity : int
+        - price : float
+        - note : String
+    }
+
+    class OrderOnline <<entity>> {
+        - id : int
+        - orderCode : String
+        - reservation : Reservation
+        - orderTime : Date
+        - totalAmount : float
+        - status : String
+        - note : String
+        - dsMonGoi : OrderedDish[]
+    }
+}
+
+gdChinhKH_jsp -right-> gdTimBanDat_jsp
+gdTimBanDat_jsp -right-> gdChonMonOnline_jsp
+gdChonMonOnline_jsp -right-> gdXacNhanGoiMon_jsp
+gdXacNhanGoiMon_jsp -down-> doLuuGoiMon_jsp
+doLuuGoiMon_jsp -right-> gdThongBaoGoiMon_jsp
+
+ReservationDAO -up-|> DAO
+CategoryDAO -up-|> DAO
+DishDAO -up-|> DAO
+OrderOnlineDAO -up-|> DAO
+OrderedDishDAO -up-|> DAO
+
+gdTimBanDat_jsp ..> ReservationDAO
+gdChonMonOnline_jsp ..> ReservationDAO
+gdChonMonOnline_jsp ..> CategoryDAO
+gdChonMonOnline_jsp ..> DishDAO
+doLuuGoiMon_jsp ..> OrderOnlineDAO
+OrderOnlineDAO ..> OrderedDishDAO
+
+ReservationDAO ..> Reservation
+CategoryDAO ..> Category
+DishDAO ..> Dish
+OrderOnlineDAO ..> OrderOnline
+OrderedDishDAO ..> OrderedDish
+
+Customer --|> User
+Customer "1" -- "0..*" Reservation
+Table "1" -- "0..*" Reservation
+Category "1" *-- "0..*" Dish
+Reservation "1" -- "0..1" OrderOnline
+OrderOnline "1" *-- "1..*" OrderedDish
+OrderedDish "0..*" --> "1" Dish
+
+@enduml

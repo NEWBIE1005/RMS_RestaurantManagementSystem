@@ -1,0 +1,115 @@
+@startuml Design_06_Module2_Sequence
+skinparam monochrome true
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title HÌNH 4.14: BIỂU ĐỒ TUẦN TỰ THIẾT KẾ MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
+
+actor "Khách hàng" as KH
+boundary "gdChinhKH.jsp" as gdChinh
+boundary "gdTimBanDat.jsp" as gdTimBan
+boundary "gdChonMonOnline.jsp" as gdChonMon
+boundary "gdXacNhanGoiMon.jsp" as gdXacNhan
+boundary "doLuuGoiMon.jsp" as doLuu
+boundary "gdThongBaoGoiMon.jsp" as gdBao
+control "ReservationDAO" as ResDAO
+control "CategoryDAO" as CatDAO
+control "DishDAO" as DishDAO
+control "OrderOnlineDAO" as OrdDAO
+control "OrderedDishDAO" as ItemDAO
+entity "Reservation" as Res
+entity "Category" as Cat
+entity "Dish" as Dish
+entity "OrderedDish" as Item
+entity "OrderOnline" as Order
+
+KH -> gdChinh : 1: click menu Dat mon online
+activate gdChinh
+gdChinh -> gdTimBan : 2: goi
+deactivate gdChinh
+activate gdTimBan
+gdTimBan --> KH : 3: hien thi GD tim ban dat
+KH -> gdTimBan : 4: nhap ten/SDT & click Tim ban
+gdTimBan -> ResDAO : 5: searchBookedTables(keyword)
+activate ResDAO
+loop dong goi ban da dat
+    ResDAO -> Res : 6: Reservation() & setter()
+    activate Res
+    Res --> ResDAO : 7: tra ve
+    deactivate Res
+end
+ResDAO --> gdTimBan : 8: tra ve ArrayList<Reservation>
+deactivate ResDAO
+gdTimBan --> KH : 9: hien thi ds ban dat
+KH -> gdTimBan : 10: click chon ban cua minh
+gdTimBan -> gdChonMon : 11: goi (reservationId)
+deactivate gdTimBan
+activate gdChonMon
+gdChonMon -> ResDAO : 12: getReservationById(id)
+activate ResDAO
+ResDAO -> Res : 13: Reservation()
+activate Res
+Res --> ResDAO : 14: tra ve
+deactivate Res
+ResDAO --> gdChonMon : 15: tra ve Reservation
+deactivate ResDAO
+gdChonMon -> CatDAO : 16: getAllCategories()
+activate CatDAO
+CatDAO -> Cat : 17: Category()
+activate Cat
+Cat --> CatDAO : 18: tra ve
+deactivate Cat
+CatDAO --> gdChonMon : 19: tra ve ArrayList<Category>
+deactivate CatDAO
+gdChonMon --> KH : 20: hien thi GD chon mon online
+
+loop den khi het mon can dat
+    KH -> gdChonMon : 21: nhap ten/loai mon & click Tim mon
+    gdChonMon -> DishDAO : 22: searchDish(name, categoryId)
+    activate DishDAO
+    DishDAO -> Dish : 23: Dish() & setter()
+    activate Dish
+    Dish --> DishDAO : 24: tra ve
+    deactivate Dish
+    DishDAO --> gdChonMon : 25: tra ve ArrayList<Dish>
+    deactivate DishDAO
+    gdChonMon --> KH : 26: hien thi ket qua mon an
+    KH -> gdChonMon : 27: chon mon, nhap so luong & click Them
+    gdChonMon -> Item : 28: OrderedDish() & setQuantity()
+    activate Item
+    Item --> gdChonMon : 29: tra ve OrderedDish
+    deactivate Item
+    gdChonMon --> KH : 30: cap nhat bang mon da goi
+end
+
+KH -> gdChonMon : 31: click Xac nhan danh sach mon
+gdChonMon -> gdXacNhan : 32: goi
+deactivate gdChonMon
+activate gdXacNhan
+gdXacNhan --> KH : 33: hien thi tom tat don goi mon
+KH -> gdXacNhan : 34: nhap ghi chu & click Xac nhan dat mon
+gdXacNhan -> doLuu : 35: goi
+deactivate gdXacNhan
+activate doLuu
+doLuu -> Order : 36: OrderOnline() & setDsMonGoi()
+activate Order
+Order --> doLuu : 37: tra ve OrderOnline
+deactivate Order
+doLuu -> OrdDAO : 38: saveOrderOnline(order)
+activate OrdDAO
+loop cho tung OrderedDish trong don
+    OrdDAO -> ItemDAO : 39: saveOrderedDish(item, orderId)
+    activate ItemDAO
+    ItemDAO --> OrdDAO : 40: tra ve true
+    deactivate ItemDAO
+end
+OrdDAO --> doLuu : 41: tra ve true
+deactivate OrdDAO
+doLuu -> gdBao : 42: goi (thong bao thanh cong)
+deactivate doLuu
+activate gdBao
+gdBao --> KH : 43: hien thi ma don & thong bao thanh cong
+deactivate gdBao
+
+@enduml

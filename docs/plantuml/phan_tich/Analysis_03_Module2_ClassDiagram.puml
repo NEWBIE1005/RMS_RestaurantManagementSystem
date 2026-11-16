@@ -1,0 +1,130 @@
+@startuml Analysis_03_Module2_ClassDiagram
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+title HÌNH 3.7: BIỂU ĐỒ LỚP PHA PHÂN TÍCH - MODULE 2: KHÁCH HÀNG ĐẶT MÓN ONLINE
+
+class GDChinhKH <<boundary>> {
+    - subDatMonOnline
+    - subDatBan
+    - subTimKiem
+}
+
+class GDTimBanDat <<boundary>> {
+    - inTenHoacSDT
+    - subTimBan
+    - outsubDSBanDat
+    - subQuayLai
+}
+
+class GDChonMonOnline <<boundary>> {
+    - outBanDaChon
+    - inTenMon
+    - inLoaiMon
+    - subTimMon
+    - outDSMonTimThay
+    - inSoLuong
+    - subThemMon
+    - outsubDSMonDaGoi
+    - subXacNhan
+}
+
+class GDXacNhanGoiMon <<boundary>> {
+    - outThongTinBan
+    - outDSMonDaGoi
+    - outTongTien
+    - inGhiChu
+    - subXacNhanLuu
+    - subQuayLai
+    - outThongBao
+}
+
+class User <<entity>> {
+    - username
+    - password
+    - fullName
+    - phone
+    - email
+    - address
+    - role
+}
+
+class Customer <<entity>> {
+    - customerCode
+    - membershipLevel
+    - rewardPoints
+}
+
+class Table <<entity>> {
+    - tableNumber
+    - capacity
+    - floor
+    - status
+    - description
+}
+
+class Reservation <<entity>> {
+    - bookingTime
+    - numberOfGuests
+    - status
+    - note
+    + searchBookedTables()
+    + getReservationById()
+}
+
+class Category <<entity>> {
+    - code
+    - name
+    - description
+    + getAllCategories()
+}
+
+class Dish <<entity>> {
+    - code
+    - name
+    - price
+    - unit
+    - description
+    - status
+    + searchDish()
+    + getDishById()
+}
+
+class OrderedDish <<entity>> {
+    - quantity
+    - price
+    - note
+    + createOrderedDish()
+}
+
+class OrderOnline <<entity>> {
+    - orderCode
+    - orderTime
+    - totalAmount
+    - status
+    - note
+    + saveOrderOnline()
+}
+
+Customer --|> User
+Customer "1" -- "0..*" Reservation
+Table "1" -- "0..*" Reservation
+Reservation "1" -- "0..1" OrderOnline
+OrderOnline "1" -- "1..*" OrderedDish
+Dish "1" -- "0..*" OrderedDish
+Category "1" -- "0..*" Dish
+
+GDChinhKH -right-> GDTimBanDat
+GDTimBanDat -right-> GDChonMonOnline
+GDChonMonOnline -right-> GDXacNhanGoiMon
+
+GDTimBanDat ..> Reservation
+GDChonMonOnline ..> Category
+GDChonMonOnline ..> Dish
+GDChonMonOnline ..> OrderedDish
+GDXacNhanGoiMon ..> OrderOnline
+
+@enduml

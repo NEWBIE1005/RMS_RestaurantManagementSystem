@@ -1,0 +1,23 @@
+@startuml Analysis_04b_Module2_StateDiagram
+skinparam monochrome true
+skinparam shadowing false
+
+title HÌNH 3.11: BIỂU ĐỒ CHUYỂN TRẠNG THÁI MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
+
+state "Hiển thị GD Chính Khách hàng" as S1
+state "Hiển thị GD Tìm bàn đã đặt" as S2
+state "Hiển thị GD Chọn món ăn online" as S3
+state "Hiển thị GD Xác nhận đơn gọi món" as S4
+
+[*] --> S1 : Bắt đầu
+S1 --> S2 : [chọn menu Đặt món online]
+S2 --> S1 : [chọn quay lại]
+S2 --> S2 : [nhập tên / SĐT & tìm bàn]
+S2 --> S3 : [chọn 1 bàn đặt của mình]
+S3 --> S2 : [chọn đổi bàn]
+S3 --> S3 : [tìm món theo tên/loại -> chọn món -> nhập SL & thêm (lặp)]
+S3 --> S4 : [chọn Xác nhận danh sách món]
+S4 --> S3 : [chọn quay lại chọn thêm món]
+S4 --> [*] : [chọn Xác nhận lưu đơn thành công]
+
+@enduml

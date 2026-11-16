@@ -1,0 +1,37 @@
+@startuml Analysis_05_Module1_Communication
+allowmixing
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultTextAlignment left
+skinparam nodesep 70
+skinparam ranksep 70
+
+title HÌNH 3.10: BIỂU ĐỒ GIAO TIẾP (COMMUNICATION DIAGRAM) PHA PHÂN TÍCH - MODULE 1
+
+actor "NV Quản lý" as NV
+
+boundary "GDChinhNVQL" as GD1
+boundary "GDQuanLyMonAn" as GD2
+boundary "GDTimKiemMonAn" as GD3
+boundary "GDSuaMonAn" as GD4
+
+entity "Dish" as Dish
+entity "Category" as Cat
+
+NV -- GD1 : 1: chon QL mon an
+NV -- GD2 : 4: chon Sua mon
+NV -- GD3 : 7: nhap ten & Tim\n12: hien thi ds\n13: chon 1 mon
+NV -- GD4 : 24: sua & bam Luu\n28: bao thanh cong
+
+GD1 -right- GD2 : 2: goi\n3: hien thi
+GD2 -right- GD3 : 5: goi\n6: hien thi
+GD3 -right- GD4 : 14: goi (dishId)\n23: hien thi form
+
+GD3 -- Dish : 8: searchDishByName()\n11: tra ve ds Dish
+GD4 -- Dish : 15: getDishById() / 17: Dish\n25: updateDish() / 27: true
+GD4 -- Cat : 18: getAllCategories()\n20: tra ve ds Category
+
+Dish -- Dish : 9: tim theo ten & 10: dong goi\n16: lay chi tiet & 26: luu DB
+Cat -- Cat : 19: lay ds the loai
+
+@enduml

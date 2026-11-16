@@ -1,0 +1,46 @@
+@startuml Design_08_DeploymentDiagram
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+
+title HÌNH 4.16: BIỂU ĐỒ THIẾT KẾ TRIỂN KHAI (DEPLOYMENT DIAGRAM) HỆ THỐNG RMS
+
+node "Client: NV Quản lý (PC / Laptop)" <<device>> {
+    node "Web Browser (Chrome / Edge)" <<executionEnvironment>> {
+        artifact "Giao diện Quản lý (HTML/CSS/JSP)" as UI_Mgr
+    }
+}
+
+node "Client: Khách hàng (PC / Smartphone)" <<device>> {
+    node "Web Browser (Chrome / Safari)" <<executionEnvironment>> {
+        artifact "Giao diện Khách hàng (HTML/CSS/JSP)" as UI_Cust
+    }
+}
+
+node "Application Server (Web Server)" <<device>> {
+    node "Apache Tomcat 9.x / JVM 21" <<executionEnvironment>> {
+        artifact "rms-webapp.war" {
+            component "View Layer (JSP Pages)" as CompView
+            component "DAO Layer (com.rms.dao)" as CompDAO
+            component "Model Layer (com.rms.model)" as CompModel
+            artifact "mysql-connector-j / h2.jar" as JDBC_Driver
+        }
+    }
+}
+
+node "Database Server" <<device>> {
+    node "MySQL Server 8.0" <<executionEnvironment>> {
+        database "rms_db" as DB {
+            frame "tblUser, tblStaff, tblCustomer, tblCategory, tblDish,\ntblCombo, tblComboDish, tblTable, tblReservation,\ntblOrderOnline, tblOrderedDish, tblBill,\ntblSupplier, tblIngredient, tblImportReceipt, tblImportDetail"
+        }
+    }
+}
+
+UI_Mgr -- CompView : HTTP / HTTPS (Port 8080/443)
+UI_Cust -- CompView : HTTP / HTTPS (Port 8080/443)
+CompView ..> CompDAO
+CompDAO ..> CompModel
+CompDAO ..> JDBC_Driver
+JDBC_Driver -- DB : JDBC TCP/IP (Port 3306)
+
+@enduml

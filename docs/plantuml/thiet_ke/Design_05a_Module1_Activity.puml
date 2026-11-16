@@ -1,0 +1,45 @@
+@startuml Design_05a_Module1_Activity
+skinparam monochrome true
+skinparam shadowing false
+
+title HÌNH 4.11: BIỂU ĐỒ THIẾT KẾ HOẠT ĐỘNG MODULE 1 - SỬA THÔNG TIN MÓN ĂN
+
+|Xử lí tại gdChinhNVQL.jsp|
+start
+:Nhận thông tin NV Quản lý;
+:Hiển thị GD Chính;
+:Click menu Quản lý thông tin món ăn;
+
+|Xử lí tại gdQuanLyMonAn.jsp|
+:Hiển thị GD chọn chức năng;
+:Chọn Sửa thông tin món ăn;
+
+|Xử lí tại gdTimKiemMonAn.jsp|
+:Hiển thị GD tìm kiếm;
+:Nhập tên món ăn cần sửa;
+:Click Tìm kiếm;
+:DishDAO: searchDishByName(name);
+:Hiển thị danh sách món ăn kết quả;
+:Click chọn 1 món ăn cần sửa;
+
+|Xử lí tại gdSuaMonAn.jsp|
+:DishDAO: getDishById(id);
+:CategoryDAO: getAllCategories();
+:Hiển thị form thông tin chi tiết món ăn;
+repeat
+  :Nhập thông tin mới & click Lưu;
+  if (Dữ liệu hợp lệ?) then (Không)
+    :Hiển thị thông báo lỗi nhập liệu;
+  endif
+repeat while (Dữ liệu hợp lệ?) is (Không)
+
+|Xử lí tại doSuaMonAn.jsp|
+:Đóng gói đối tượng Dish;
+:DishDAO: updateDish(dish);
+
+|Xử lí tại gdThongBao.jsp|
+:Hiển thị thông báo cập nhật thành công;
+:Click OK quay về trang chủ;
+stop
+
+@enduml

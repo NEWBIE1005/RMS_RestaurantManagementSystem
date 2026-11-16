@@ -1,0 +1,58 @@
+@startuml Design_06a_Module2_Activity
+skinparam monochrome true
+skinparam shadowing false
+
+title HÌNH 4.13: BIỂU ĐỒ THIẾT KẾ HOẠT ĐỘNG MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
+
+|Xử lí tại gdChinhKH.jsp|
+start
+:Hiển thị trang chủ Khách hàng;
+:Click chọn menu Đặt món online;
+
+|Xử lí tại gdTimBanDat.jsp|
+:Hiển thị GD tìm bàn đặt;
+:Nhập tên khách hàng hoặc SĐT;
+:Click Tìm bàn;
+:ReservationDAO: searchBookedTables(keyword);
+:Hiển thị danh sách bàn đã đặt;
+:Click chọn bàn của mình;
+
+|Xử lí tại gdChonMonOnline.jsp|
+:ReservationDAO: getReservationById(id);
+:CategoryDAO: getAllCategories();
+:Lưu Reservation vào Session;
+:Hiển thị GD chọn món online;
+
+repeat
+  :Nhập tên món hoặc chọn loại món;
+  :Click Tìm món;
+  :DishDAO: searchDish(name, categoryId);
+  :Hiển thị danh sách món kết quả;
+  :Chọn 1 món & nhập số lượng;
+  :Click Thêm vào đơn;
+  :Tạo OrderedDish & cập nhật dsMonGoi (Session);
+repeat while (Còn muốn gọi thêm món?) is (Có)
+->Không;
+
+:Click Xác nhận danh sách món;
+
+|Xử lí tại gdXacNhanGoiMon.jsp|
+:Hiển thị thông tin bàn, danh sách món & tổng tiền;
+:Nhập ghi chú (nếu có) & click Xác nhận đặt món;
+
+|Xử lí tại doLuuGoiMon.jsp|
+:Đóng gói đối tượng OrderOnline;
+:OrderOnlineDAO: saveOrderOnline(order);
+note right
+  Transaction MySQL:
+  1. Insert tblOrderOnline
+  2. Loop OrderedDishDAO: saveOrderedDish()
+  3. Commit Transaction
+end note
+:Xóa giỏ món tạm trong Session;
+
+|Xử lí tại gdThongBaoGoiMon.jsp|
+:Hiển thị mã đơn gọi món & thông báo thành công;
+stop
+
+@enduml

@@ -1,0 +1,88 @@
+@startuml Design_05_Module1_Sequence
+skinparam monochrome true
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title HÌNH 4.12: BIỂU ĐỒ TUẦN TỰ THIẾT KẾ MODULE 1 - NV QUẢN LÝ SỬA THÔNG TIN MÓN ĂN
+
+actor "NV Quản lý" as NV
+boundary "gdChinhNVQL.jsp" as gdChinh
+boundary "gdQuanLyMonAn.jsp" as gdMenu
+boundary "gdTimKiemMonAn.jsp" as gdTim
+boundary "gdSuaMonAn.jsp" as gdSua
+boundary "doSuaMonAn.jsp" as doSua
+boundary "gdThongBao.jsp" as gdBao
+control "DishDAO" as DishDAO
+control "CategoryDAO" as CatDAO
+entity "Dish" as Dish
+entity "Category" as Cat
+
+NV -> gdChinh : 1: click QL thong tin mon an
+activate gdChinh
+gdChinh -> gdMenu : 2: goi
+deactivate gdChinh
+activate gdMenu
+gdMenu --> NV : 3: hien thi menu chuc nang
+NV -> gdMenu : 4: chon Sua thong tin mon an
+gdMenu -> gdTim : 5: goi
+deactivate gdMenu
+activate gdTim
+gdTim --> NV : 6: hien thi form tim kiem
+NV -> gdTim : 7: nhap ten mon & click Tim kiem
+gdTim -> DishDAO : 8: searchDishByName(name)
+activate DishDAO
+loop dong goi tung mon an tim thay
+    DishDAO -> Dish : 9: Dish() & setter()
+    activate Dish
+    Dish --> DishDAO : 10: tra ve
+    deactivate Dish
+end
+DishDAO --> gdTim : 11: tra ve ArrayList<Dish>
+deactivate DishDAO
+gdTim --> NV : 12: hien thi danh sach ket qua
+NV -> gdTim : 13: click chon 1 mon an (Sua)
+gdTim -> gdSua : 14: goi (dishId)
+deactivate gdTim
+activate gdSua
+gdSua -> DishDAO : 15: getDishById(id)
+activate DishDAO
+DishDAO -> Dish : 16: Dish() & setter()
+activate Dish
+Dish --> DishDAO : 17: tra ve
+deactivate Dish
+DishDAO --> gdSua : 18: tra ve Dish
+deactivate DishDAO
+gdSua -> CatDAO : 19: getAllCategories()
+activate CatDAO
+CatDAO -> Cat : 20: Category() & setter()
+activate Cat
+Cat --> CatDAO : 21: tra ve
+deactivate Cat
+CatDAO --> gdSua : 22: tra ve ArrayList<Category>
+deactivate CatDAO
+gdSua --> NV : 23: hien thi form sua chi tiet mon an
+NV -> gdSua : 24: nhap thong tin moi & click Luu
+gdSua -> doSua : 25: goi (submit form)
+deactivate gdSua
+activate doSua
+doSua -> Dish : 26: Dish() & set thong tin moi()
+activate Dish
+Dish --> doSua : 27: tra ve
+deactivate Dish
+doSua -> DishDAO : 28: updateDish(dish)
+activate DishDAO
+DishDAO --> doSua : 29: tra ve true
+deactivate DishDAO
+doSua -> gdBao : 30: goi (thong bao thanh cong)
+deactivate doSua
+activate gdBao
+gdBao --> NV : 31: hien thi thong bao thanh cong
+NV -> gdBao : 32: click OK
+gdBao -> gdChinh : 33: goi
+deactivate gdBao
+activate gdChinh
+gdChinh --> NV : 34: hien thi trang chu
+deactivate gdChinh
+
+@enduml

@@ -1,0 +1,35 @@
+@startuml Spec_03_UseCase_Module2
+left to right direction
+skinparam packageStyle rectangle
+skinparam monochrome true
+skinparam shadowing false
+
+title HÌNH 3.3: BIỂU ĐỒ USE CASE CHI TIẾT MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
+
+actor "Thành viên" as Member
+actor "Khách hàng" as Customer
+
+Customer --|> Member
+
+rectangle "Module 2: Khách hàng đặt món online" {
+    usecase "Đặt món online" as UC_OrderOnline
+    usecase "Chọn menu đặt món" as UC_ChooseMenu
+    usecase "Tìm bàn đặt theo tên / SĐT" as UC_FindTable
+    usecase "Chọn bàn của mình" as UC_ChooseTable
+    usecase "Tìm kiếm món ăn theo tên / loại" as UC_SearchDish
+    usecase "Chọn món ăn và nhập số lượng" as UC_SelectQty
+    usecase "Xóa / sửa món trong danh sách" as UC_ModifyItem
+    usecase "Xác nhận và lưu đơn gọi món" as UC_ConfirmOrder
+}
+
+Customer -- UC_OrderOnline
+
+UC_OrderOnline ..> UC_ChooseMenu : <<include>>
+UC_OrderOnline ..> UC_FindTable : <<include>>
+UC_OrderOnline ..> UC_ChooseTable : <<include>>
+UC_OrderOnline ..> UC_SearchDish : <<include>>
+UC_OrderOnline ..> UC_SelectQty : <<include>>
+UC_OrderOnline ..> UC_ConfirmOrder : <<include>>
+UC_ModifyItem ..> UC_SelectQty : <<extend>>
+
+@enduml

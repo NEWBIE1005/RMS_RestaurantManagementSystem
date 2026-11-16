@@ -1,0 +1,178 @@
+@startuml Design_01_EntityClassDiagram
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+
+title HÌNH 4.1: BIỂU ĐỒ THIẾT KẾ LỚP THỰC THỂ TOÀN HỆ THỐNG RMS\n(Theo Mục 4.1 - Bổ sung id, kiểu dữ liệu Java, hợp thành & thuộc tính đối tượng)
+
+class User {
+    - id : int
+    - username : String
+    - password : String
+    - fullName : String
+    - phone : String
+    - email : String
+    - address : String
+    - role : String
+}
+
+class Staff {
+    - staffCode : String
+    - position : String
+    - salary : float
+}
+
+class Customer {
+    - customerCode : String
+    - membershipLevel : String
+    - rewardPoints : int
+}
+
+class Category {
+    - id : int
+    - code : String
+    - name : String
+    - description : String
+    - dsDish : Dish[]
+}
+
+class Dish {
+    - id : int
+    - code : String
+    - name : String
+    - price : float
+    - unit : String
+    - description : String
+    - status : String
+    - image : String
+    - category : Category
+}
+
+class Combo {
+    - id : int
+    - name : String
+    - discountRate : float
+    - totalPrice : float
+    - description : String
+    - dsComboDish : ComboDish[]
+}
+
+class ComboDish {
+    - id : int
+    - combo : Combo
+    - dish : Dish
+    - quantity : int
+}
+
+class Table {
+    - id : int
+    - tableNumber : String
+    - capacity : int
+    - floor : int
+    - status : String
+    - description : String
+}
+
+class Reservation {
+    - id : int
+    - customer : Customer
+    - table : Table
+    - bookingTime : Date
+    - numberOfGuests : int
+    - status : String
+    - note : String
+}
+
+class OrderOnline {
+    - id : int
+    - orderCode : String
+    - reservation : Reservation
+    - orderTime : Date
+    - totalAmount : float
+    - status : String
+    - note : String
+    - dsMonGoi : OrderedDish[]
+}
+
+class OrderedDish {
+    - id : int
+    - dish : Dish
+    - quantity : int
+    - price : float
+    - note : String
+}
+
+class Bill {
+    - id : int
+    - billCode : String
+    - orderOnline : OrderOnline
+    - staff : Staff
+    - paymentTime : Date
+    - totalAmount : float
+    - discount : float
+    - finalAmount : float
+    - paymentMethod : String
+}
+
+class Ingredient {
+    - id : int
+    - code : String
+    - name : String
+    - unit : String
+    - unitPrice : float
+    - stockQuantity : float
+    - minStockThreshold : float
+}
+
+class Supplier {
+    - id : int
+    - name : String
+    - address : String
+    - phone : String
+    - email : String
+    - taxCode : String
+}
+
+class ImportReceipt {
+    - id : int
+    - receiptCode : String
+    - supplier : Supplier
+    - staff : Staff
+    - importDate : Date
+    - totalAmount : float
+    - note : String
+    - dsChiTiet : ImportDetail[]
+}
+
+class ImportDetail {
+    - id : int
+    - ingredient : Ingredient
+    - quantity : float
+    - importPrice : float
+    - subTotal : float
+}
+
+Staff --|> User
+Customer --|> User
+
+Category "1" *-- "0..*" Dish : chứa >
+Combo "1" *-- "1..*" ComboDish : bao gồm >
+ComboDish "0..*" --> "1" Dish : tham chiếu >
+
+Customer "1" -- "0..*" Reservation : đặt >
+Table "1" -- "0..*" Reservation : được đặt >
+
+Reservation "1" -- "0..1" OrderOnline : gắn với >
+OrderOnline "1" *-- "1..*" OrderedDish : gồm các món >
+OrderedDish "0..*" --> "1" Dish : chọn >
+
+OrderOnline "1" -- "0..1" Bill : thanh toán >
+Staff "1" -- "0..*" Bill : lập >
+
+Supplier "1" -- "0..*" ImportReceipt : cung cấp >
+Staff "1" -- "0..*" ImportReceipt : lập phiếu >
+ImportReceipt "1" *-- "1..*" ImportDetail : gồm >
+ImportDetail "0..*" --> "1" Ingredient : nhập >
+
+@enduml

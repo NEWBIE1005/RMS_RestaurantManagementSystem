@@ -1,0 +1,184 @@
+@startuml Analysis_01_EntityClassDiagram
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+
+title HÌNH 3.5: BIỂU ĐỒ LỚP THỰC THỂ PHA PHÂN TÍCH TOÀN HỆ THỐNG RMS\n(Theo Mục 3.2.2 - Chưa có thuộc tính id và kiểu dữ liệu)
+
+class User {
+    - username
+    - password
+    - fullName
+    - phone
+    - email
+    - address
+    - role
+}
+
+class Staff {
+    - staffCode
+    - position
+    - salary
+}
+
+class ManagementStaff {
+}
+
+class WarehouseStaff {
+}
+
+class SaleStaff {
+}
+
+class Customer {
+    - customerCode
+    - membershipLevel
+    - rewardPoints
+}
+
+class Category {
+    - code
+    - name
+    - description
+}
+
+class Dish {
+    - code
+    - name
+    - price
+    - unit
+    - description
+    - status
+    - image
+}
+
+class Combo {
+    - name
+    - discountRate
+    - totalPrice
+    - description
+}
+
+class ComboDish {
+    - quantity
+}
+
+class Table {
+    - tableNumber
+    - capacity
+    - floor
+    - status
+    - description
+}
+
+class Reservation {
+    - bookingTime
+    - numberOfGuests
+    - status
+    - note
+}
+
+class OrderOnline {
+    - orderCode
+    - orderTime
+    - totalAmount
+    - status
+    - note
+}
+
+class OrderedDish {
+    - quantity
+    - price
+    - note
+}
+
+class Bill {
+    - billCode
+    - paymentTime
+    - totalAmount
+    - discount
+    - finalAmount
+    - paymentMethod
+}
+
+class Ingredient {
+    - code
+    - name
+    - unit
+    - unitPrice
+    - stockQuantity
+    - minStockThreshold
+}
+
+class Supplier {
+    - name
+    - address
+    - phone
+    - email
+    - taxCode
+}
+
+class ImportReceipt {
+    - receiptCode
+    - importDate
+    - totalAmount
+    - note
+}
+
+class ImportDetail {
+    - quantity
+    - importPrice
+    - subTotal
+}
+
+class DishStat {
+    - totalOrderedQty
+    - totalRevenue
+}
+
+class IngredientStat {
+    - totalImportedQty
+    - totalImportCost
+}
+
+class CustomerStat {
+    - totalReservations
+    - totalSpent
+}
+
+class SupplierStat {
+    - totalReceipts
+    - totalSupplyValue
+}
+
+Staff --|> User
+Customer --|> User
+ManagementStaff --|> Staff
+WarehouseStaff --|> Staff
+SaleStaff --|> Staff
+
+DishStat --|> Dish
+IngredientStat --|> Ingredient
+CustomerStat --|> Customer
+SupplierStat --|> Supplier
+
+Category "1" -- "0..*" Dish
+Combo "1" -- "1..*" ComboDish
+Dish "1" -- "0..*" ComboDish
+
+Customer "1" -- "0..*" Reservation
+Table "1" -- "0..*" Reservation
+Reservation "1" -- "0..1" OrderOnline
+OrderOnline "1" -- "1..*" OrderedDish
+Dish "1" -- "0..*" OrderedDish
+
+OrderOnline "1" -- "0..1" Bill
+SaleStaff "1" -- "0..*" Bill
+
+Supplier "1" -- "0..*" ImportReceipt
+WarehouseStaff "1" -- "0..*" ImportReceipt
+ImportReceipt "1" -- "1..*" ImportDetail
+Ingredient "1" -- "0..*" ImportDetail
+
+@enduml

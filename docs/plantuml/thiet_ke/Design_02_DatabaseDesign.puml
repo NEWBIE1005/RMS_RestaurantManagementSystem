@@ -1,0 +1,192 @@
+@startuml Design_02_DatabaseDesign
+skinparam linetype ortho
+skinparam monochrome true
+skinparam shadowing false
+skinparam roundCorner 4
+
+title HÌNH 4.2: BIỂU ĐỒ THIẾT KẾ CƠ SỞ DỮ LIỆU MYSQL (rms_db) TOÀN HỆ THỐNG RMS
+
+entity "tblUser" as tblUser {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * username : VARCHAR(50) [UNIQUE]
+    * password : VARCHAR(255)
+    * fullName : VARCHAR(100)
+    * phone : VARCHAR(20)
+    * email : VARCHAR(100)
+    * address : VARCHAR(255)
+    * role : VARCHAR(30)
+}
+
+entity "tblStaff" as tblStaff {
+    * **userId** : INT [PK, FK -> tblUser.id]
+    --
+    * staffCode : VARCHAR(20) [UNIQUE]
+    * position : VARCHAR(50)
+    * salary : DECIMAL(12,2)
+}
+
+entity "tblCustomer" as tblCustomer {
+    * **userId** : INT [PK, FK -> tblUser.id]
+    --
+    * customerCode : VARCHAR(20) [UNIQUE]
+    * membershipLevel : VARCHAR(30)
+    * rewardPoints : INT
+}
+
+entity "tblCategory" as tblCategory {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * code : VARCHAR(20) [UNIQUE]
+    * name : VARCHAR(100)
+    * description : TEXT
+}
+
+entity "tblDish" as tblDish {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * categoryId : INT [FK -> tblCategory.id]
+    * code : VARCHAR(20) [UNIQUE]
+    * name : VARCHAR(150)
+    * price : DECIMAL(12,2)
+    * unit : VARCHAR(30)
+    * description : TEXT
+    * status : VARCHAR(30)
+    * image : VARCHAR(255)
+}
+
+entity "tblCombo" as tblCombo {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * name : VARCHAR(150)
+    * discountRate : FLOAT
+    * totalPrice : DECIMAL(12,2)
+    * description : TEXT
+}
+
+entity "tblComboDish" as tblComboDish {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * comboId : INT [FK -> tblCombo.id]
+    * dishId : INT [FK -> tblDish.id]
+    * quantity : INT
+}
+
+entity "tblTable" as tblTable {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * tableNumber : VARCHAR(20) [UNIQUE]
+    * capacity : INT
+    * floor : INT
+    * status : VARCHAR(30)
+    * description : VARCHAR(255)
+}
+
+entity "tblReservation" as tblReservation {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * customerId : INT [FK -> tblCustomer.userId]
+    * tableId : INT [FK -> tblTable.id]
+    * bookingTime : DATETIME
+    * numberOfGuests : INT
+    * status : VARCHAR(30)
+    * note : TEXT
+}
+
+entity "tblOrderOnline" as tblOrderOnline {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * orderCode : VARCHAR(30) [UNIQUE]
+    * reservationId : INT [FK -> tblReservation.id]
+    * orderTime : DATETIME
+    * totalAmount : DECIMAL(12,2)
+    * status : VARCHAR(30)
+    * note : TEXT
+}
+
+entity "tblOrderedDish" as tblOrderedDish {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * orderId : INT [FK -> tblOrderOnline.id]
+    * dishId : INT [FK -> tblDish.id]
+    * quantity : INT
+    * price : DECIMAL(12,2)
+    * note : VARCHAR(255)
+}
+
+entity "tblBill" as tblBill {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * billCode : VARCHAR(30) [UNIQUE]
+    * orderId : INT [FK -> tblOrderOnline.id]
+    * staffId : INT [FK -> tblStaff.userId]
+    * paymentTime : DATETIME
+    * totalAmount : DECIMAL(12,2)
+    * discount : DECIMAL(12,2)
+    * finalAmount : DECIMAL(12,2)
+    * paymentMethod : VARCHAR(30)
+}
+
+entity "tblSupplier" as tblSupplier {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * name : VARCHAR(150)
+    * address : VARCHAR(255)
+    * phone : VARCHAR(20)
+    * email : VARCHAR(100)
+    * taxCode : VARCHAR(30)
+}
+
+entity "tblIngredient" as tblIngredient {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * code : VARCHAR(30) [UNIQUE]
+    * name : VARCHAR(150)
+    * unit : VARCHAR(20)
+    * unitPrice : DECIMAL(12,2)
+    * stockQuantity : DECIMAL(10,2)
+    * minStockThreshold : DECIMAL(10,2)
+}
+
+entity "tblImportReceipt" as tblImportReceipt {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * receiptCode : VARCHAR(30) [UNIQUE]
+    * supplierId : INT [FK -> tblSupplier.id]
+    * staffId : INT [FK -> tblStaff.userId]
+    * importDate : DATETIME
+    * totalAmount : DECIMAL(14,2)
+    * note : TEXT
+}
+
+entity "tblImportDetail" as tblImportDetail {
+    * **id** : INT [PK, AUTO_INCREMENT]
+    --
+    * receiptId : INT [FK -> tblImportReceipt.id]
+    * ingredientId : INT [FK -> tblIngredient.id]
+    * quantity : DECIMAL(10,2)
+    * importPrice : DECIMAL(12,2)
+    * subTotal : DECIMAL(14,2)
+}
+
+tblUser ||--o| tblStaff
+tblUser ||--o| tblCustomer
+tblCategory ||--o{ tblDish
+tblCombo ||--|{ tblComboDish
+tblDish ||--o{ tblComboDish
+
+tblCustomer ||--o{ tblReservation
+tblTable ||--o{ tblReservation
+tblReservation ||--o| tblOrderOnline
+tblOrderOnline ||--|{ tblOrderedDish
+tblDish ||--o{ tblOrderedDish
+
+tblOrderOnline ||--o| tblBill
+tblStaff ||--o{ tblBill
+
+tblSupplier ||--o{ tblImportReceipt
+tblStaff ||--o{ tblImportReceipt
+tblImportReceipt ||--|{ tblImportDetail
+tblIngredient ||--o{ tblImportDetail
+
+@enduml

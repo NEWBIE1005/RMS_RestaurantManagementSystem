@@ -1,0 +1,39 @@
+@startuml Spec_02_UseCase_Module1
+left to right direction
+skinparam packageStyle rectangle
+skinparam monochrome true
+skinparam shadowing false
+
+title HÌNH 3.2: BIỂU ĐỒ USE CASE CHI TIẾT MODULE 1 - NV QUẢN LÝ SỬA THÔNG TIN MÓN ĂN
+
+actor "Thành viên" as Member
+actor "Nhân viên" as Staff
+actor "NV Quản lý" as Manager
+
+Staff --|> Member
+Manager --|> Staff
+
+rectangle "Module 1: NV Quản lý sửa thông tin món ăn" {
+    usecase "Đăng nhập" as UC_Login
+    usecase "NVQL đăng nhập" as UC_MgrLogin
+    usecase "Sửa thông tin món ăn" as UC_EditDish
+    usecase "Chọn menu quản lý món ăn" as UC_SelectMenu
+    usecase "Chọn chức năng sửa món ăn" as UC_SelectFunc
+    usecase "Tìm kiếm món ăn theo tên" as UC_SearchDish
+    usecase "Chọn món ăn từ kết quả" as UC_SelectDish
+    usecase "Nhập và lưu thông tin món ăn" as UC_SaveDish
+
+    UC_MgrLogin --|> UC_Login
+}
+
+Member -- UC_Login
+Manager -- UC_EditDish
+
+UC_EditDish ..> UC_MgrLogin : <<include>>
+UC_EditDish ..> UC_SelectMenu : <<include>>
+UC_EditDish ..> UC_SelectFunc : <<include>>
+UC_EditDish ..> UC_SearchDish : <<include>>
+UC_EditDish ..> UC_SelectDish : <<include>>
+UC_EditDish ..> UC_SaveDish : <<include>>
+
+@enduml

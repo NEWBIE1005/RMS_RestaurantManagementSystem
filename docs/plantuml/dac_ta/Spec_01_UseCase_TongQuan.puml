@@ -1,0 +1,69 @@
+@startuml Spec_01_UseCase_TongQuan
+left to right direction
+skinparam packageStyle rectangle
+skinparam monochrome true
+skinparam shadowing false
+
+title HÌNH 3.1: BIỂU ĐỒ USE CASE TỔNG QUAN HỆ THỐNG QUẢN LÝ NHÀ HÀNG (RMS)
+
+actor "Thành viên" as Member
+actor "Nhân viên" as Staff
+actor "Khách hàng" as Customer
+actor "NV Quản lý" as Manager
+actor "NV Kho" as Warehouse
+actor "NV Bán hàng" as Sale
+
+Staff --|> Member
+Customer --|> Member
+Manager --|> Staff
+Warehouse --|> Staff
+Sale --|> Staff
+
+rectangle "Hệ thống Quản lý Nhà hàng (RMS)" {
+    usecase "Đăng nhập" as UC_Login
+    usecase "Đổi mật khẩu" as UC_ChangePwd
+
+    usecase "Xem thống kê\n(Món ăn, Nguyên liệu, KH, NCC)" as UC_ViewStats
+    usecase "Quản lý thông tin món ăn" as UC_ManageDish
+    usecase "Tạo thực đơn Combo" as UC_MakeCombo
+
+    usecase "Nhập nguyên liệu từ NCC" as UC_ImportMat
+    usecase "Quản lý thông tin NCC" as UC_ManageSup
+
+    usecase "Đón tiếp khách hàng" as UC_ReceiveCust
+    usecase "Ghi order tại bàn" as UC_TakeOrder
+    usecase "Thanh toán tại bàn" as UC_PayAtTable
+    usecase "Làm thẻ thành viên" as UC_MakeCard
+    usecase "Xác nhận đặt bàn" as UC_ConfirmRes
+    usecase "Xác nhận đặt món online" as UC_ConfirmOrd
+
+    usecase "Tìm kiếm món ăn / bàn" as UC_Search
+    usecase "Đặt bàn trực tuyến" as UC_BookTable
+    usecase "Đặt món online" as UC_OrderOnline
+}
+
+Member -- UC_Login
+Member -- UC_ChangePwd
+
+Manager -- UC_ViewStats
+Manager -- UC_ManageDish
+Manager -- UC_MakeCombo
+
+Warehouse -- UC_ImportMat
+Warehouse -- UC_ManageSup
+
+Sale -- UC_ReceiveCust
+Sale -- UC_TakeOrder
+Sale -- UC_PayAtTable
+Sale -- UC_MakeCard
+Sale -- UC_ConfirmRes
+Sale -- UC_ConfirmOrd
+
+Customer -- UC_Search
+Customer -- UC_BookTable
+Customer -- UC_OrderOnline
+Customer -- UC_MakeCard
+Customer -- UC_ConfirmRes
+Customer -- UC_ConfirmOrd
+
+@enduml

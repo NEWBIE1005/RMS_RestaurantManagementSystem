@@ -1,0 +1,138 @@
+@startuml Design_03_Module1_ClassDiagram
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+title HÌNH 4.6: BIỂU ĐỒ LỚP THIẾT KẾ CHI TIẾT MODULE 1 - SỬA THÔNG TIN MÓN ĂN
+
+package "Tầng Giao diện (View - JSP)" {
+    class gdChinhNVQL_jsp <<boundary>> {
+        - subQLMonAn : link
+        - nvql : Staff
+    }
+
+    class gdQuanLyMonAn_jsp <<boundary>> {
+        - radChucNang : radio
+        - btnTiepTuc : submit
+        - btnQuayLai : link
+    }
+
+    class gdTimKiemMonAn_jsp <<boundary>> {
+        - txtTenMon : text
+        - btnTimKiem : submit
+        - tblKetQua : Table
+        - linkSua : link
+        - listMonAn : ArrayList<Dish>
+    }
+
+    class gdSuaMonAn_jsp <<boundary>> {
+        - txtCode : text
+        - txtName : text
+        - cbCategory : Select
+        - txtPrice : text
+        - txtUnit : text
+        - cbStatus : Select
+        - txtDescription : textarea
+        - btnLuu : submit
+        - btnHuy : link
+        - monan : Dish
+        - listCategory : ArrayList<Category>
+    }
+
+    class doSuaMonAn_jsp <<boundary>> {
+        - monan : Dish
+        - ketQua : boolean
+    }
+
+    class gdThongBao_jsp <<boundary>> {
+        - lblThongBao : text
+        - btnOK : link
+    }
+}
+
+package "Tầng Truy xuất Dữ liệu (DAO)" {
+    class DAO <<dao>> {
+        # con : Connection
+        + DAO()
+    }
+
+    class CategoryDAO <<dao>> {
+        + CategoryDAO()
+        + getAllCategories() : ArrayList<Category>
+    }
+
+    class DishDAO <<dao>> {
+        + DishDAO()
+        + searchDishByName(name : String) : ArrayList<Dish>
+        + getDishById(id : int) : Dish
+        + updateDish(dish : Dish) : boolean
+    }
+}
+
+package "Tầng Thực thể (Model)" {
+    class User <<entity>> {
+        - id : int
+        - username : String
+        - password : String
+        - fullName : String
+        - phone : String
+        - email : String
+        - address : String
+        - role : String
+    }
+
+    class Staff <<entity>> {
+        - staffCode : String
+        - position : String
+        - salary : float
+    }
+
+    class Category <<entity>> {
+        - id : int
+        - code : String
+        - name : String
+        - description : String
+    }
+
+    class Dish <<entity>> {
+        - id : int
+        - code : String
+        - name : String
+        - price : float
+        - unit : String
+        - description : String
+        - status : String
+        - image : String
+        - category : Category
+    }
+}
+
+gdChinhNVQL_jsp -right-> gdQuanLyMonAn_jsp
+gdQuanLyMonAn_jsp -right-> gdTimKiemMonAn_jsp
+gdTimKiemMonAn_jsp -down-> gdSuaMonAn_jsp
+gdSuaMonAn_jsp -right-> doSuaMonAn_jsp
+doSuaMonAn_jsp -right-> gdThongBao_jsp
+
+CategoryDAO -up-|> DAO
+DishDAO -up-|> DAO
+
+gdTimKiemMonAn_jsp ..> DishDAO
+gdSuaMonAn_jsp ..> DishDAO
+gdSuaMonAn_jsp ..> CategoryDAO
+doSuaMonAn_jsp ..> DishDAO
+
+DishDAO ..> Dish
+CategoryDAO ..> Category
+
+gdChinhNVQL_jsp ..> Staff
+gdTimKiemMonAn_jsp ..> Dish
+gdSuaMonAn_jsp ..> Dish
+gdSuaMonAn_jsp ..> Category
+doSuaMonAn_jsp ..> Dish
+
+Staff --|> User
+Category "1" *-- "0..*" Dish
+
+@enduml

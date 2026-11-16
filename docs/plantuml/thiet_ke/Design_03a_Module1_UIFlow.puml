@@ -1,0 +1,34 @@
+@startuml Design_03a_Module1_UIFlow
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+title HÌNH 4.5: THIẾT KẾ GIAO DIỆN MODULE 1 - NV QUẢN LÝ SỬA THÔNG TIN MÓN ĂN
+
+package "gdChinhNVQL.jsp\n(Trang chủ NV Quản lý)" as P1 {
+  class "Trang chủ Quản lý\n--\nXin chào: NV Quản lý\n[Quản lý thông tin món ăn] (click)\n[Tạo Combo]  [Xem thống kê]" as UI1
+}
+
+package "gdQuanLyMonAn.jsp\n(Menu quản lý món ăn)" as P2 {
+  class "Quản lý món ăn\n--\n( ) Thêm món ăn mới\n(o) Sửa thông tin món ăn (click)\n( ) Xóa món ăn\n--\n[Tiếp tục]  [Quay lại]" as UI2
+}
+
+package "gdTimKiemMonAn.jsp\n(Tìm món ăn theo tên)" as P3 {
+  class "Tìm kiếm món ăn cần sửa\n--\nTên món: [____________] [Tìm kiếm]\n--\nBảng kết quả:\nSTT | Mã | Tên món | Loại | Đơn giá | Sửa\n1 | D01 | Lẩu thái hải sản | Lẩu | 380,000 | [Sửa]\n2 | D02 | Bò Fuji nướng | Nướng | 250,000 | [Sửa]" as UI3
+}
+
+package "gdSuaMonAn.jsp\n(Form sửa chi tiết món)" as P4 {
+  class "Sửa thông tin món ăn\n--\nMã món: [D01] (readonly)\nTên món*: [Lẩu thái hải sản]\nLoại món*: [Món Lẩu v]\nĐơn giá*: [380000]  ĐVT*: [Nồi]\nTrạng thái: [Đang phục vụ v]\nMô tả: [...]\n--\n[Lưu]  [Hủy]" as UI4
+}
+
+package "gdThongBao.jsp\n(Kết quả cập nhật)" as P5 {
+  class "Thông báo\n--\nCập nhật thông tin món ăn thành công!\n--\n[OK / Về trang chủ]" as UI5
+}
+
+UI1 -right-> UI2 : click menu QL món ăn
+UI2 -down-> UI3 : chọn Sửa & Tiếp tục
+UI3 -down-> UI4 : click [Sửa] 1 món
+UI4 -right-> UI5 : click [Lưu] (doSuaMonAn.jsp)
+UI5 -up-> UI1 : click [OK]
+
+@enduml
