@@ -4,6 +4,8 @@ skinparam monochrome true
 skinparam shadowing false
 skinparam linetype ortho
 skinparam packageStyle rectangle
+skinparam nodesep 25
+skinparam ranksep 45
 
 title HÌNH 4.8: BIỂU ĐỒ LỚP THIẾT KẾ CHI TIẾT MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
 
@@ -177,24 +179,30 @@ DishDAO -up-|> DAO
 OrderOnlineDAO -up-|> DAO
 OrderedDishDAO -up-|> DAO
 
-gdTimBanDat_jsp ..> ReservationDAO
-gdChonMonOnline_jsp ..> ReservationDAO
-gdChonMonOnline_jsp ..> CategoryDAO
-gdChonMonOnline_jsp ..> DishDAO
-doLuuGoiMon_jsp ..> OrderOnlineDAO
-OrderOnlineDAO ..> OrderedDishDAO
+gdTimBanDat_jsp -down..> ReservationDAO
+gdChonMonOnline_jsp -down..> ReservationDAO
+gdChonMonOnline_jsp -down..> CategoryDAO
+gdChonMonOnline_jsp -down..> DishDAO
+doLuuGoiMon_jsp -down..> OrderOnlineDAO
+OrderOnlineDAO -down..> OrderedDishDAO
 
-ReservationDAO ..> Reservation
-CategoryDAO ..> Category
-DishDAO ..> Dish
-OrderOnlineDAO ..> OrderOnline
-OrderedDishDAO ..> OrderedDish
+gdChinhKH_jsp -down-> Customer
+gdTimBanDat_jsp -down-> Reservation
+gdChonMonOnline_jsp -down-> OrderedDish
+gdXacNhanGoiMon_jsp -down-> OrderOnline
+doLuuGoiMon_jsp -down-> OrderOnline
+
+ReservationDAO -down-> Reservation
+CategoryDAO -down-> Category
+DishDAO -down-> Dish
+OrderOnlineDAO -down-> OrderOnline
+OrderedDishDAO -down-> OrderedDish
 
 Customer --|> User
 Customer "1" -- "0..*" Reservation
 Table "1" -- "0..*" Reservation
-Category "1" *-- "0..*" Dish
-Reservation "1" -- "0..1" OrderOnline
+Category "1" o-- "0..*" Dish
+Reservation "1" -- "0..*" OrderOnline
 OrderOnline "1" *-- "1..*" OrderedDish
 OrderedDish "0..*" --> "1" Dish
 

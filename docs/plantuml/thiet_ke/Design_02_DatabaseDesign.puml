@@ -3,6 +3,8 @@ skinparam linetype ortho
 skinparam monochrome true
 skinparam shadowing false
 skinparam roundCorner 4
+skinparam nodesep 45
+skinparam ranksep 45
 
 title HÌNH 4.2: BIỂU ĐỒ THIẾT KẾ CƠ SỞ DỮ LIỆU MYSQL (rms_db) TOÀN HỆ THỐNG RMS
 
@@ -177,7 +179,7 @@ tblDish ||--o{ tblComboDish
 
 tblCustomer ||--o{ tblReservation
 tblTable ||--o{ tblReservation
-tblReservation ||--o| tblOrderOnline
+tblReservation ||--o{ tblOrderOnline
 tblOrderOnline ||--|{ tblOrderedDish
 tblDish ||--o{ tblOrderedDish
 

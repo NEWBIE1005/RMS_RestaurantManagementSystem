@@ -2,8 +2,10 @@
 skinparam classAttributeIconSize 0
 skinparam monochrome true
 skinparam shadowing false
-skinparam linetype ortho
+skinparam linetype polyline
 skinparam packageStyle rectangle
+skinparam nodesep 40
+skinparam ranksep 55
 
 title HÌNH 3.7: BIỂU ĐỒ LỚP PHA PHÂN TÍCH - MODULE 2: KHÁCH HÀNG ĐẶT MÓN ONLINE
 
@@ -109,22 +111,24 @@ class OrderOnline <<entity>> {
     + saveOrderOnline()
 }
 
-Customer --|> User
-Customer "1" -- "0..*" Reservation
-Table "1" -- "0..*" Reservation
-Reservation "1" -- "0..1" OrderOnline
-OrderOnline "1" -- "1..*" OrderedDish
-Dish "1" -- "0..*" OrderedDish
-Category "1" -- "0..*" Dish
-
 GDChinhKH -right-> GDTimBanDat
 GDTimBanDat -right-> GDChonMonOnline
 GDChonMonOnline -right-> GDXacNhanGoiMon
 
-GDTimBanDat ..> Reservation
-GDChonMonOnline ..> Category
-GDChonMonOnline ..> Dish
-GDChonMonOnline ..> OrderedDish
-GDXacNhanGoiMon ..> OrderOnline
+GDChinhKH -down-> Customer
+GDTimBanDat -down-> Reservation
+GDChonMonOnline -down-> Reservation
+GDChonMonOnline -down-> Category
+GDChonMonOnline -down-> Dish
+GDChonMonOnline -down-> OrderedDish
+GDXacNhanGoiMon -down-> OrderOnline
+
+Customer -down-|> User
+Customer "1" -- "0..*" Reservation
+Table "1" -- "0..*" Reservation
+Category "1" o-- "0..*" Dish
+Reservation "1" -- "0..*" OrderOnline
+OrderOnline "1" *-- "1..*" OrderedDish
+Dish "1" -- "0..*" OrderedDish
 
 @enduml

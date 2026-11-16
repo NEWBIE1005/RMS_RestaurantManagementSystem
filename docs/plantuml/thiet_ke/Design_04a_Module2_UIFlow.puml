@@ -2,6 +2,8 @@
 skinparam monochrome true
 skinparam shadowing false
 skinparam defaultTextAlignment center
+hide circle
+hide empty members
 
 title HÌNH 4.7: THIẾT KẾ GIAO DIỆN MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
 

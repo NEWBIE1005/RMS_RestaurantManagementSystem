@@ -2,8 +2,10 @@
 skinparam classAttributeIconSize 0
 skinparam monochrome true
 skinparam shadowing false
-skinparam linetype ortho
+skinparam linetype polyline
 skinparam packageStyle rectangle
+skinparam nodesep 45
+skinparam ranksep 55
 
 title HÌNH 3.6: BIỂU ĐỒ LỚP PHA PHÂN TÍCH - MODULE 1: NV QUẢN LÝ SỬA THÔNG TIN MÓN ĂN
 
@@ -78,17 +80,17 @@ class Dish <<entity>> {
     + updateDish()
 }
 
-Staff --|> User
-ManagementStaff --|> Staff
-Category "1" -- "0..*" Dish
-
 GDChinhNVQL -right-> GDQuanLyMonAn
 GDQuanLyMonAn -right-> GDTimKiemMonAn
 GDTimKiemMonAn -right-> GDSuaMonAn
 
-GDChinhNVQL ..> ManagementStaff
-GDTimKiemMonAn ..> Dish
-GDSuaMonAn ..> Dish
-GDSuaMonAn ..> Category
+GDChinhNVQL -down-> ManagementStaff
+GDTimKiemMonAn -down-> Dish
+GDSuaMonAn -down-> Dish
+GDSuaMonAn -down-> Category
+
+ManagementStaff -down-|> Staff
+Staff -down-|> User
+Category "1" o-- "0..*" Dish
 
 @enduml

@@ -3,8 +3,10 @@ skinparam classAttributeIconSize 0
 skinparam monochrome true
 skinparam shadowing false
 skinparam linetype ortho
+skinparam nodesep 45
+skinparam ranksep 55
 
-title HÌNH 3.5: BIỂU ĐỒ LỚP THỰC THỂ PHA PHÂN TÍCH TOÀN HỆ THỐNG RMS\n(Theo Mục 3.2.2 - Chưa có thuộc tính id và kiểu dữ liệu)
+title HÌNH 3.5: BIỂU ĐỒ LỚP THỰC THỂ PHA PHÂN TÍCH TOÀN HỆ THỐNG RMS\n(Chưa có thuộc tính id và kiểu dữ liệu)
 
 class User {
     - username
@@ -163,14 +165,14 @@ IngredientStat --|> Ingredient
 CustomerStat --|> Customer
 SupplierStat --|> Supplier
 
-Category "1" -- "0..*" Dish
-Combo "1" -- "1..*" ComboDish
+Category "1" o-- "0..*" Dish
+Combo "1" *-- "1..*" ComboDish
 Dish "1" -- "0..*" ComboDish
 
 Customer "1" -- "0..*" Reservation
 Table "1" -- "0..*" Reservation
-Reservation "1" -- "0..1" OrderOnline
-OrderOnline "1" -- "1..*" OrderedDish
+Reservation "1" -- "0..*" OrderOnline
+OrderOnline "1" *-- "1..*" OrderedDish
 Dish "1" -- "0..*" OrderedDish
 
 OrderOnline "1" -- "0..1" Bill
@@ -178,7 +180,7 @@ SaleStaff "1" -- "0..*" Bill
 
 Supplier "1" -- "0..*" ImportReceipt
 WarehouseStaff "1" -- "0..*" ImportReceipt
-ImportReceipt "1" -- "1..*" ImportDetail
+ImportReceipt "1" *-- "1..*" ImportDetail
 Ingredient "1" -- "0..*" ImportDetail
 
 @enduml

@@ -68,10 +68,12 @@ loop den khi het mon can dat
     KH -> gdChonMon : 21: nhap ten/loai mon & click Tim mon
     gdChonMon -> DishDAO : 22: searchDish(name, categoryId)
     activate DishDAO
-    DishDAO -> Dish : 23: Dish() & setter()
-    activate Dish
-    Dish --> DishDAO : 24: tra ve
-    deactivate Dish
+    loop dong goi tung mon tim thay
+        DishDAO -> Dish : 23: Dish() & setter()
+        activate Dish
+        Dish --> DishDAO : 24: tra ve
+        deactivate Dish
+    end
     DishDAO --> gdChonMon : 25: tra ve ArrayList<Dish>
     deactivate DishDAO
     gdChonMon --> KH : 26: hien thi ket qua mon an
@@ -98,13 +100,17 @@ Order --> doLuu : 37: tra ve OrderOnline
 deactivate Order
 doLuu -> OrdDAO : 38: saveOrderOnline(order)
 activate OrdDAO
+note right of OrdDAO
+  Transaction CSDL:
+  Insert tblOrderOnline -> lay orderId
+end note
 loop cho tung OrderedDish trong don
     OrdDAO -> ItemDAO : 39: saveOrderedDish(item, orderId)
     activate ItemDAO
     ItemDAO --> OrdDAO : 40: tra ve true
     deactivate ItemDAO
 end
-OrdDAO --> doLuu : 41: tra ve true
+OrdDAO --> doLuu : 41: tra ve true (commit)
 deactivate OrdDAO
 doLuu -> gdBao : 42: goi (thong bao thanh cong)
 deactivate doLuu

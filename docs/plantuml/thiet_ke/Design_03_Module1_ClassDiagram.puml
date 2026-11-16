@@ -4,6 +4,8 @@ skinparam monochrome true
 skinparam shadowing false
 skinparam linetype ortho
 skinparam packageStyle rectangle
+skinparam nodesep 35
+skinparam ranksep 45
 
 title HÌNH 4.6: BIỂU ĐỒ LỚP THIẾT KẾ CHI TIẾT MODULE 1 - SỬA THÔNG TIN MÓN ĂN
 
@@ -58,16 +60,17 @@ package "Tầng Truy xuất Dữ liệu (DAO)" {
         + DAO()
     }
 
-    class CategoryDAO <<dao>> {
-        + CategoryDAO()
-        + getAllCategories() : ArrayList<Category>
-    }
-
     class DishDAO <<dao>> {
         + DishDAO()
         + searchDishByName(name : String) : ArrayList<Dish>
         + getDishById(id : int) : Dish
+        + checkDuplicateName(id : int, name : String) : boolean
         + updateDish(dish : Dish) : boolean
+    }
+
+    class CategoryDAO <<dao>> {
+        + CategoryDAO()
+        + getAllCategories() : ArrayList<Category>
     }
 }
 
@@ -115,24 +118,24 @@ gdTimKiemMonAn_jsp -down-> gdSuaMonAn_jsp
 gdSuaMonAn_jsp -right-> doSuaMonAn_jsp
 doSuaMonAn_jsp -right-> gdThongBao_jsp
 
-CategoryDAO -up-|> DAO
 DishDAO -up-|> DAO
+CategoryDAO -up-|> DAO
 
-gdTimKiemMonAn_jsp ..> DishDAO
-gdSuaMonAn_jsp ..> DishDAO
-gdSuaMonAn_jsp ..> CategoryDAO
-doSuaMonAn_jsp ..> DishDAO
+gdTimKiemMonAn_jsp -down..> DishDAO
+gdSuaMonAn_jsp -down..> DishDAO
+gdSuaMonAn_jsp -down..> CategoryDAO
+doSuaMonAn_jsp -down..> DishDAO
 
-DishDAO ..> Dish
-CategoryDAO ..> Category
+gdChinhNVQL_jsp -down-> Staff
+gdTimKiemMonAn_jsp -down-> Dish
+gdSuaMonAn_jsp -down-> Dish
+gdSuaMonAn_jsp -down-> Category
+doSuaMonAn_jsp -down-> Dish
 
-gdChinhNVQL_jsp ..> Staff
-gdTimKiemMonAn_jsp ..> Dish
-gdSuaMonAn_jsp ..> Dish
-gdSuaMonAn_jsp ..> Category
-doSuaMonAn_jsp ..> Dish
+DishDAO -down-> Dish
+CategoryDAO -down-> Category
 
-Staff --|> User
-Category "1" *-- "0..*" Dish
+Staff -down-|> User
+Category "1" o-- "0..*" Dish
 
 @enduml

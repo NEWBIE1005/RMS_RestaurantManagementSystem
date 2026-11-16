@@ -2,6 +2,8 @@
 skinparam monochrome true
 skinparam shadowing false
 skinparam defaultTextAlignment center
+hide circle
+hide empty members
 
 title HÌNH 4.5: THIẾT KẾ GIAO DIỆN MODULE 1 - NV QUẢN LÝ SỬA THÔNG TIN MÓN ĂN
 

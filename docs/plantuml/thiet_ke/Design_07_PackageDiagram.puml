@@ -2,7 +2,9 @@
 skinparam packageStyle rectangle
 skinparam monochrome true
 skinparam shadowing false
-skinparam linetype ortho
+skinparam linetype polyline
+skinparam nodesep 45
+skinparam ranksep 55
 
 title HÌNH 4.15: BIỂU ĐỒ THIẾT KẾ GÓI (PACKAGE DIAGRAM) TOÀN HỆ THỐNG RMS
 
@@ -29,6 +31,14 @@ package "webapp (View - JSP & CSS)" as pkg_view {
     }
 }
 
+package "com.rms.launcher" as pkg_launcher {
+    [LocalTomcatServer]
+}
+
+package "com.rms.util" as pkg_util {
+    [FormatUtil]
+}
+
 package "com.rms.dao (Data Access Objects)" as pkg_dao {
     [DAO]
     [UserDAO]
@@ -37,6 +47,12 @@ package "com.rms.dao (Data Access Objects)" as pkg_dao {
     [ReservationDAO]
     [OrderOnlineDAO]
     [OrderedDishDAO]
+}
+
+package "unittest (JUnit 4)" as pkg_test {
+    [TestDishDAO]
+    [TestReservationDAO]
+    [TestOrderOnlineDAO]
 }
 
 package "com.rms.model (Entities / JavaBeans)" as pkg_model {
@@ -58,16 +74,13 @@ package "com.rms.model (Entities / JavaBeans)" as pkg_model {
     [ImportDetail]
 }
 
-package "unittest (JUnit 4)" as pkg_test {
-    [TestDishDAO]
-    [TestReservationDAO]
-    [TestOrderOnlineDAO]
-}
-
-pkg_view ..> pkg_dao
-pkg_view ..> pkg_model
-pkg_dao ..> pkg_model
-pkg_test ..> pkg_dao
-pkg_test ..> pkg_model
+pkg_view -right[hidden]-> pkg_launcher
+pkg_view -down..> pkg_dao
+pkg_view -down..> pkg_util
+pkg_view -down..> pkg_model
+pkg_launcher -down..> pkg_dao
+pkg_dao -down..> pkg_model
+pkg_test -left..> pkg_dao
+pkg_test -down..> pkg_model
 
 @enduml

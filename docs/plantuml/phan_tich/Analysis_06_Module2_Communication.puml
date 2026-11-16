@@ -3,7 +3,7 @@ allowmixing
 skinparam monochrome true
 skinparam shadowing false
 skinparam defaultTextAlignment left
-skinparam nodesep 65
+skinparam nodesep 70
 skinparam ranksep 75
 
 title HÌNH 3.12: BIỂU ĐỒ GIAO TIẾP (COMMUNICATION DIAGRAM) PHA PHÂN TÍCH - MODULE 2
@@ -21,26 +21,26 @@ entity "Dish" as Dish
 entity "OrderedDish" as Item
 entity "OrderOnline" as Ord
 
-KH -- GD1 : 1: chon Dat mon online
-KH -- GD2 : 4: nhap ten/SDT & Tim\n9: hien thi ban\n10: chon ban
-KH -- GD3 : 16: [Lap] tim mon\n21: hien thi ds mon\n22: chon & nhap SL\n26: cap nhat ds\n27: Xac nhan
-KH -- GD4 : 30: Xac nhan luu\n35: bao thanh cong
+KH -- GD1 : 1: chon Dat mon online ↓
+KH -- GD2 : 4: nhap ten/SDT & Tim ↓\n↑ 9: hien thi ban\n10: chon ban ↓
+KH -- GD3 : 16: [Lap] tim mon ↓\n↑ 21: hien thi ds mon\n22: chon & nhap SL ↓\n↑ 26: cap nhat ds\n27: Xac nhan ↓
+KH -- GD4 : 30: Xac nhan luu ↓\n↑ 35: bao thanh cong
 
-GD1 -right- GD2 : 2: goi\n3: hien thi
-GD2 -right- GD3 : 11: goi (resId)\n15: hien thi GD
-GD3 -right- GD4 : 28: goi (dsMon)\n29: hien thi tom tat
+GD1 -right- GD2 : 2: goi →\n← 3: hien thi
+GD2 -right- GD3 : 11: goi (resId) →\n← 15: hien thi GD
+GD3 -right- GD4 : 28: goi (dsMon) →\n← 29: hien thi tom tat
 
-GD2 -- Res : 5: searchBookedTables()\n8: tra ve ds Reservation
-GD3 -- Cat : 12: getAllCategories()\n14: ds Category
-GD3 -- Dish : 17: searchDish()\n20: ds Dish
-GD3 -- Item : 23: createOrderedDish()\n25: OrderedDish
-GD4 -- Ord : 31: saveOrderOnline()\n34: true
+GD2 -- Res : 5: searchBookedTables() ↓\n↑ 8: tra ve ds Reservation
+GD3 -- Cat : 12: getAllCategories() ↓\n↑ 14: ds Category
+GD3 -- Dish : 17: searchDish() ↓\n↑ 20: ds Dish
+GD3 -- Item : 23: createOrderedDish() ↓\n↑ 25: OrderedDish
+GD4 -- Ord : 31: saveOrderOnline() ↓\n↑ 34: true
 
 Res -- Res : 6: tim ban\n7: dong goi
 Cat -- Cat : 13: lay ds loai
 Dish -- Dish : 18: tim theo ten/loai\n19: dong goi
 Item -- Item : 24: dong goi mon & SL
-Ord -- Item : 33: luu chi tiet mon
+Ord -- Item : 33: luu chi tiet mon ↓
 Ord -- Ord : 32: luu don vao DB
 
 @enduml

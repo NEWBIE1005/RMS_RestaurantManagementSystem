@@ -55,10 +55,12 @@ DishDAO --> gdSua : 18: tra ve Dish
 deactivate DishDAO
 gdSua -> CatDAO : 19: getAllCategories()
 activate CatDAO
-CatDAO -> Cat : 20: Category() & setter()
-activate Cat
-Cat --> CatDAO : 21: tra ve
-deactivate Cat
+loop dong goi tung the loai
+    CatDAO -> Cat : 20: Category() & setter()
+    activate Cat
+    Cat --> CatDAO : 21: tra ve
+    deactivate Cat
+end
 CatDAO --> gdSua : 22: tra ve ArrayList<Category>
 deactivate CatDAO
 gdSua --> NV : 23: hien thi form sua chi tiet mon an
@@ -66,23 +68,27 @@ NV -> gdSua : 24: nhap thong tin moi & click Luu
 gdSua -> doSua : 25: goi (submit form)
 deactivate gdSua
 activate doSua
-doSua -> Dish : 26: Dish() & set thong tin moi()
-activate Dish
-Dish --> doSua : 27: tra ve
-deactivate Dish
-doSua -> DishDAO : 28: updateDish(dish)
+doSua -> DishDAO : 26: checkDuplicateName(id, name)
 activate DishDAO
-DishDAO --> doSua : 29: tra ve true
+DishDAO --> doSua : 27: tra ve false (khong trung)
 deactivate DishDAO
-doSua -> gdBao : 30: goi (thong bao thanh cong)
+doSua -> Dish : 28: Dish() & set thong tin moi()
+activate Dish
+Dish --> doSua : 29: tra ve
+deactivate Dish
+doSua -> DishDAO : 30: updateDish(dish)
+activate DishDAO
+DishDAO --> doSua : 31: tra ve true
+deactivate DishDAO
+doSua -> gdBao : 32: goi (thong bao thanh cong)
 deactivate doSua
 activate gdBao
-gdBao --> NV : 31: hien thi thong bao thanh cong
-NV -> gdBao : 32: click OK
-gdBao -> gdChinh : 33: goi
+gdBao --> NV : 33: hien thi thong bao thanh cong
+NV -> gdBao : 34: click OK
+gdBao -> gdChinh : 35: goi
 deactivate gdBao
 activate gdChinh
-gdChinh --> NV : 34: hien thi trang chu
+gdChinh --> NV : 36: hien thi trang chu
 deactivate gdChinh
 
 @enduml

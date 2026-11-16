@@ -1,7 +1,9 @@
 @startuml Design_08_DeploymentDiagram
 skinparam monochrome true
 skinparam shadowing false
-skinparam linetype ortho
+skinparam linetype polyline
+skinparam nodesep 75
+skinparam ranksep 75
 
 title HÌNH 4.16: BIỂU ĐỒ THIẾT KẾ TRIỂN KHAI (DEPLOYMENT DIAGRAM) HỆ THỐNG RMS
 
@@ -31,16 +33,16 @@ node "Application Server (Web Server)" <<device>> {
 node "Database Server" <<device>> {
     node "MySQL Server 8.0" <<executionEnvironment>> {
         database "rms_db" as DB {
-            frame "tblUser, tblStaff, tblCustomer, tblCategory, tblDish,\ntblCombo, tblComboDish, tblTable, tblReservation,\ntblOrderOnline, tblOrderedDish, tblBill,\ntblSupplier, tblIngredient, tblImportReceipt, tblImportDetail"
+            frame "16 bảng dữ liệu (tblUser ... tblImportDetail)"
         }
     }
 }
 
-UI_Mgr -- CompView : HTTP / HTTPS (Port 8080/443)
-UI_Cust -- CompView : HTTP / HTTPS (Port 8080/443)
+UI_Mgr -down- CompView : HTTP (Port 8080)
+UI_Cust -down- CompView : HTTP (Port 8080)
 CompView ..> CompDAO
 CompDAO ..> CompModel
 CompDAO ..> JDBC_Driver
-JDBC_Driver -- DB : JDBC TCP/IP (Port 3306)
+JDBC_Driver -down- DB : JDBC TCP/IP (Port 3306)
 
 @enduml
