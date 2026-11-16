@@ -1,19 +1,17 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.ArrayList,com.rms.dao.*,com.rms.model.*,com.rms.util.FormatUtil"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*,com.rms.dao.*,com.rms.model.*,com.rms.util.FormatUtil"%>
 <%
     request.setCharacterEncoding("UTF-8");
 
+    Reservation selectedRes = (Reservation) session.getAttribute("selectedRes");
     String resIdParam = request.getParameter("resId");
-    Reservation selectedRes = (Reservation) session.getAttribute("selectedReservation");
-    if (resIdParam != null && !resIdParam.trim().isEmpty()) {
+    if (resIdParam != null && !resIdParam.isEmpty()) {
         try {
             int resId = Integer.parseInt(resIdParam);
-            Reservation loaded = new ReservationDAO().getReservationById(resId);
-            if (loaded != null) {
-                if (selectedRes == null || selectedRes.getId() != loaded.getId()) {
-                    session.setAttribute("dsMonDaGoi", new ArrayList<OrderedDish>());
-                }
-                selectedRes = loaded;
-                session.setAttribute("selectedReservation", selectedRes);
+            Reservation found = new ReservationDAO().getReservationById(resId);
+            if (found != null) {
+                selectedRes = found;
+                session.setAttribute("selectedRes", selectedRes);
+                session.removeAttribute("dsMonDaGoi");
             }
         } catch (Exception ignored) {}
     }
@@ -23,78 +21,109 @@
         return;
     }
 
+    @SuppressWarnings("unchecked")
     ArrayList<OrderedDish> dsMonDaGoi = (ArrayList<OrderedDish>) session.getAttribute("dsMonDaGoi");
     if (dsMonDaGoi == null) {
         dsMonDaGoi = new ArrayList<>();
         session.setAttribute("dsMonDaGoi", dsMonDaGoi);
     }
 
-    String msg = null;
-    String errMsg = null;
-    String act = request.getParameter("act");
-    if ("add".equals(act)) {
-        try {
-            int dishId = Integer.parseInt(request.getParameter("dishId"));
-            int quantity = Integer.parseInt(request.getParameter("quantity"));
-            if (quantity <= 0) {
-                errMsg = "Số lượng món phải lớn hơn 0!";
-            } else {
-                Dish d = new DishDAO().getDishById(dishId);
-                if (d == null || !"Đang phục vụ".equalsIgnoreCase(d.getStatus())) {
-                    errMsg = "Món ăn hiện không khả dụng để đặt!";
-                } else {
-                    boolean found = false;
-                    for (OrderedDish item : dsMonDaGoi) {
-                        if (item.getDish().getId() == dishId) {
-                            item.setQuantity(item.getQuantity() + quantity);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        OrderedDish item = new OrderedDish();
-                        item.setDish(d);
-                        item.setQuantity(quantity);
-                        item.setPrice(d.getPrice());
-                        item.setNote("");
-                        dsMonDaGoi.add(item);
-                    }
-                    msg = "Đã thêm " + quantity + " " + d.getUnit() + " " + d.getName() + " vào danh sách món!";
-                }
-            }
-        } catch (Exception e) {
-            errMsg = "Dữ liệu thêm món không hợp lệ!";
-        }
-    } else if ("remove".equals(act)) {
-        try {
-            int dishId = Integer.parseInt(request.getParameter("dishId"));
-            dsMonDaGoi.removeIf(item -> item.getDish().getId() == dishId);
-            msg = "Đã xóa món khỏi danh sách gọi!";
-        } catch (Exception ignored) {}
-    }
-
     String dishName = request.getParameter("dishName");
     if (dishName == null) dishName = "";
     int categoryId = 0;
-    try {
-        if (request.getParameter("categoryId") != null) {
-            categoryId = Integer.parseInt(request.getParameter("categoryId"));
+    try { categoryId = Integer.parseInt(request.getParameter("categoryId")); } catch (Exception ignored) {}
+
+    String act = request.getParameter("act");
+    DishDAO dishDAO = new DishDAO();
+
+    if ("POST".equalsIgnoreCase(request.getMethod()) || "remove".equals(act)) {
+        if ("add".equals(act)) {
+            int dishId = 0;
+            int qty = 1;
+            try { dishId = Integer.parseInt(request.getParameter("dishId")); } catch (Exception ignored) {}
+            try { qty = Integer.parseInt(request.getParameter("quantity")); } catch (Exception ignored) {}
+            String itemNote = request.getParameter("itemNote") != null ? request.getParameter("itemNote").trim() : "";
+
+            if (qty <= 0 || qty > 100) {
+                session.setAttribute("cartErr", "Số lượng đặt mỗi lượt phải từ 1 đến 100.");
+            } else {
+                Dish d = dishDAO.getDishById(dishId);
+                if (d == null || !"Đang phục vụ".equalsIgnoreCase(d.getStatus())) {
+                    session.setAttribute("cartErr", "Món ăn hiện tạm hết hoặc không phục vụ.");
+                } else {
+                    boolean existed = false;
+                    for (OrderedDish item : dsMonDaGoi) {
+                        if (item.getDish().getId() == dishId) {
+                            item.setQuantity(Math.min(100, item.getQuantity() + qty));
+                            item.setPrice(d.getPrice());
+                            if (!itemNote.isEmpty()) item.setNote(itemNote);
+                            existed = true;
+                            break;
+                        }
+                    }
+                    if (!existed) {
+                        OrderedDish od = new OrderedDish();
+                        od.setDish(d);
+                        od.setQuantity(qty);
+                        od.setPrice(d.getPrice());
+                        od.setNote(itemNote);
+                        dsMonDaGoi.add(od);
+                    }
+                    session.setAttribute("cartMsg", "Đã thêm \"" + d.getName() + "\" (x" + qty + ") vào danh sách món gọi.");
+                }
+            }
+            response.sendRedirect("gdChonMonOnline.jsp?dishName=" + java.net.URLEncoder.encode(dishName, "UTF-8") + "&categoryId=" + categoryId);
+            return;
+        } else if ("update".equals(act)) {
+            int dishId = 0;
+            int qty = 1;
+            try { dishId = Integer.parseInt(request.getParameter("dishId")); } catch (Exception ignored) {}
+            try { qty = Integer.parseInt(request.getParameter("quantity")); } catch (Exception ignored) {}
+            String itemNote = request.getParameter("itemNote") != null ? request.getParameter("itemNote").trim() : "";
+
+            if (qty <= 0 || qty > 100) {
+                session.setAttribute("cartErr", "Số lượng cập nhật phải từ 1 đến 100.");
+            } else {
+                for (OrderedDish item : dsMonDaGoi) {
+                    if (item.getDish().getId() == dishId) {
+                        item.setQuantity(qty);
+                        item.setNote(itemNote);
+                        session.setAttribute("cartMsg", "Đã cập nhật số lượng món \"" + item.getDish().getName() + "\".");
+                        break;
+                    }
+                }
+            }
+            response.sendRedirect("gdChonMonOnline.jsp?dishName=" + java.net.URLEncoder.encode(dishName, "UTF-8") + "&categoryId=" + categoryId);
+            return;
+        } else if ("remove".equals(act)) {
+            int remId = 0;
+            try { remId = Integer.parseInt(request.getParameter("dishId")); } catch (Exception ignored) {}
+            final int targetRemoveId = remId;
+            dsMonDaGoi.removeIf(item -> item.getDish().getId() == targetRemoveId);
+            session.setAttribute("cartMsg", "Đã xóa món ăn khỏi danh sách đã chọn.");
+            response.sendRedirect("gdChonMonOnline.jsp?dishName=" + java.net.URLEncoder.encode(dishName, "UTF-8") + "&categoryId=" + categoryId);
+            return;
         }
-    } catch (Exception ignored) {}
+    }
+
+    String msg = (String) session.getAttribute("cartMsg");
+    String errMsg = (String) session.getAttribute("cartErr");
+    session.removeAttribute("cartMsg");
+    session.removeAttribute("cartErr");
 
     ArrayList<Category> listCategory = new CategoryDAO().getAllCategories();
-    ArrayList<Dish> listMonTimThay = new DishDAO().searchDish(dishName, categoryId);
+    ArrayList<Dish> listMonTimThay = dishDAO.searchDish(dishName, categoryId);
 
     float totalAmount = 0f;
-    for (OrderedDish od : dsMonDaGoi) {
-        totalAmount += od.getSubTotal();
+    for (OrderedDish item : dsMonDaGoi) {
+        totalAmount += item.getSubTotal();
     }
 %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Chọn món ăn online - RMS</title>
+    <title>Chọn món ăn Online - RMS</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -108,30 +137,24 @@
 
 <div class="container">
     <div class="card" style="padding: 16px 24px; background: #fffbeb; border-color: #f59e0b;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <strong>Thông tin bàn đã chọn:</strong>
-                Mã đặt <code>#RES-<%= selectedRes.getId() %></code> |
-                <strong><%= FormatUtil.escapeHtml(selectedRes.getTable().getTableNumber()) %></strong> (Tầng <%= selectedRes.getTable().getFloor() %>, <%= selectedRes.getTable().getCapacity() %> chỗ) |
-                Khách hàng: <strong><%= FormatUtil.escapeHtml(selectedRes.getCustomer().getFullName()) %></strong> (<%= FormatUtil.escapeHtml(selectedRes.getCustomer().getPhone()) %>) |
-                Giờ đặt: <%= FormatUtil.formatDateTime(selectedRes.getBookingTime()) %>
-            </div>
+        <div>
+            <strong>Thông tin bàn đã chọn:</strong>
+            Mã đặt <code>#RES-<%= selectedRes.getId() %></code> |
+            <strong><%= FormatUtil.escapeHtml(selectedRes.getTable().getTableNumber()) %></strong> (Tầng <%= selectedRes.getTable().getFloor() %>, <%= selectedRes.getTable().getCapacity() %> chỗ) |
+            Khách hàng: <strong><%= FormatUtil.escapeHtml(selectedRes.getCustomer().getFullName()) %></strong> (<%= FormatUtil.escapeHtml(selectedRes.getCustomer().getPhone()) %>) |
+            Giờ đặt: <%= FormatUtil.formatDateTime(selectedRes.getBookingTime()) %>
         </div>
     </div>
 
-    <% if (msg != null) { %>
-        <div class="alert alert-success"><%= FormatUtil.escapeHtml(msg) %></div>
-    <% } %>
-    <% if (errMsg != null) { %>
-        <div class="alert alert-danger"><%= FormatUtil.escapeHtml(errMsg) %></div>
-    <% } %>
+    <% if (msg != null) { %><div class="alert alert-success"><%= FormatUtil.escapeHtml(msg) %></div><% } %>
+    <% if (errMsg != null) { %><div class="alert alert-danger"><%= FormatUtil.escapeHtml(errMsg) %></div><% } %>
 
     <div class="split-layout">
         <div class="card">
             <div class="page-header">
                 <div>
-                    <h2>Tìm kiếm & Chọn món ăn</h2>
-                    <p class="subtitle">Tìm món theo tên hoặc loại món, chọn món và nhập số lượng</p>
+                    <h2>Tìm kiếm &amp; Chọn món ăn</h2>
+                    <p class="subtitle">Tìm món theo tên hoặc loại món, chọn số lượng và nhấn Thêm</p>
                 </div>
             </div>
 
@@ -155,13 +178,11 @@
                         <th>Món ăn</th>
                         <th>Loại</th>
                         <th class="text-right">Đơn giá</th>
-                        <th class="text-center">Số lượng & Thêm</th>
+                        <th class="text-center">Số lượng &amp; Thêm</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <% for (Dish d : listMonTimThay) {
-                        boolean available = "Đang phục vụ".equalsIgnoreCase(d.getStatus());
-                    %>
+                    <% for (Dish d : listMonTimThay) { boolean available = "Đang phục vụ".equalsIgnoreCase(d.getStatus()); %>
                     <tr>
                         <td>
                             <strong><%= FormatUtil.escapeHtml(d.getName()) %></strong><br>
@@ -180,7 +201,7 @@
                                     <button type="submit" class="btn btn-primary btn-sm">+ Thêm</button>
                                 </form>
                             <% } else { %>
-                                <span class="badge badge-danger">Tạm hết</span>
+                                <span class="badge badge-danger"><%= FormatUtil.escapeHtml(d.getStatus()) %></span>
                             <% } %>
                         </td>
                     </tr>
@@ -194,7 +215,7 @@
             <div class="page-header">
                 <div>
                     <h2>Danh sách món đã gọi</h2>
-                    <p class="subtitle">Kiểm tra các món đã chọn trước khi xác nhận</p>
+                    <p class="subtitle">Có thể sửa số lượng, ghi chú từng món trước khi xác nhận</p>
                 </div>
             </div>
 
@@ -204,7 +225,7 @@
                 <table class="data-table">
                     <thead>
                     <tr>
-                        <th>Tên món</th>
+                        <th>Món ăn &amp; Ghi chú</th>
                         <th class="text-center">SL</th>
                         <th class="text-right">Thành tiền</th>
                         <th class="text-center">Xóa</th>
@@ -217,7 +238,19 @@
                             <strong><%= FormatUtil.escapeHtml(item.getDish().getName()) %></strong><br>
                             <small style="color: #6b7280;"><%= FormatUtil.formatCurrency(item.getPrice()) %> / <%= FormatUtil.escapeHtml(item.getDish().getUnit()) %></small>
                         </td>
-                        <td class="text-center"><strong><%= item.getQuantity() %></strong></td>
+                        <td class="text-center">
+                            <form action="gdChonMonOnline.jsp" method="post" style="display:inline-flex; flex-direction:column; gap:4px; align-items:center;">
+                                <input type="hidden" name="act" value="update">
+                                <input type="hidden" name="dishId" value="<%= item.getDish().getId() %>">
+                                <input type="hidden" name="dishName" value="<%= FormatUtil.escapeHtml(dishName) %>">
+                                <input type="hidden" name="categoryId" value="<%= categoryId %>">
+                                <div style="display:flex; gap:4px;">
+                                    <input class="form-control" type="number" name="quantity" value="<%= item.getQuantity() %>" min="1" max="99" style="width:56px; padding:3px 6px;">
+                                    <button type="submit" class="btn btn-secondary btn-sm" style="padding:3px 8px;">Lưu</button>
+                                </div>
+                                <input class="form-control" type="text" name="itemNote" value="<%= FormatUtil.escapeHtml(item.getNote()) %>" placeholder="Ghi chú món..." style="width:120px; padding:2px 6px; font-size:12px;">
+                            </form>
+                        </td>
                         <td class="text-right"><%= FormatUtil.formatCurrency(item.getSubTotal()) %></td>
                         <td class="text-center">
                             <a href="gdChonMonOnline.jsp?act=remove&dishId=<%= item.getDish().getId() %>&dishName=<%= java.net.URLEncoder.encode(dishName, "UTF-8") %>&categoryId=<%= categoryId %>" class="btn btn-danger btn-sm">X</a>

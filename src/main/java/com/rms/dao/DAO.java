@@ -246,5 +246,44 @@ public class DAO {
                 + "(4, 3, '2026-11-16 19:30:00', 5, 'Đã xác nhận', 'Khách yêu cầu ghế trẻ em'),"
                 + "(4, 2, '2026-11-17 12:00:00', 4, 'Đã xác nhận', 'Đặt ăn trưa cùng đồng nghiệp'),"
                 + "(5, 4, '2026-11-16 20:00:00', 7, 'Đã xác nhận', 'Sinh nhật gia đình')");
+
+        seedInventoryAndCombo(st);
+    }
+
+    private static void seedInventoryAndCombo(Statement st) throws Exception {
+        try (ResultSet rsSup = st.executeQuery("SELECT COUNT(*) FROM tblSupplier")) {
+            if (rsSup.next() && rsSup.getInt(1) == 0) {
+                st.execute("INSERT INTO tblSupplier (name, address, phone, email, taxCode) VALUES "
+                        + "('Công ty Hải Sản Biển Đông', 'Q. Hai Bà Trưng, Hà Nội', '0243888999', 'haisan@biendong.vn', '0108112233'),"
+                        + "('Nông Sản Sạch Cao Nguyên', 'H. Hoài Đức, Hà Nội', '0243777666', 'sales@nongsan.vn', '0109223344'),"
+                        + "('Thực Phẩm Nhập Khẩu Á Châu', 'Q. Cầu Giấy, Hà Nội', '0243555444', 'contact@achaufood.vn', '0107334455')");
+            }
+        }
+        try (ResultSet rsIng = st.executeQuery("SELECT COUNT(*) FROM tblIngredient")) {
+            if (rsIng.next() && rsIng.getInt(1) == 0) {
+                st.execute("INSERT INTO tblIngredient (code, name, unit, unitPrice, stockQuantity, minStockThreshold) VALUES "
+                        + "('NL01', 'Tôm sú tươi size 25', 'kg', 290000, 18.5, 5.0),"
+                        + "('NL02', 'Thịt bò Fuji cắt lát', 'kg', 420000, 12.0, 4.0),"
+                        + "('NL03', 'Rau muống & Cải thảo lẩu', 'kg', 28000, 3.5, 5.0),"
+                        + "('NL04', 'Gạch cua đồng tươi', 'kg', 165000, 8.0, 3.0),"
+                        + "('NL05', 'Đào ngâm & Trà đen đặc biệt', 'hộp', 65000, 14.0, 4.0)");
+            }
+        }
+        try (ResultSet rsImp = st.executeQuery("SELECT COUNT(*) FROM tblImportReceipt")) {
+            if (rsImp.next() && rsImp.getInt(1) == 0) {
+                st.execute("INSERT INTO tblImportReceipt (receiptCode, supplierId, staffId, importDate, totalAmount, note) VALUES "
+                        + "('PN-261116-01', 1, 3, '2026-11-16 07:30:00', 5365000, 'Nhập hải sản tươi đầu ngày')");
+                st.execute("INSERT INTO tblImportDetail (receiptId, ingredientId, quantity, importPrice, subTotal) VALUES "
+                        + "(1, 1, 18.5, 290000, 5365000)");
+            }
+        }
+        try (ResultSet rsCb = st.executeQuery("SELECT COUNT(*) FROM tblCombo")) {
+            if (rsCb.next() && rsCb.getInt(1) == 0) {
+                st.execute("INSERT INTO tblCombo (name, discountRate, totalPrice, description) VALUES "
+                        + "('Combo Tiệc Lẩu Nướng 4 Người', 15, 709750, 'Gồm 1 Nồi Lẩu Thái Hải Sản, 1 Bò Fuji Nướng Đá, 4 Trà Đào Cam Sả')");
+                st.execute("INSERT INTO tblComboDish (comboId, dishId, quantity) VALUES "
+                        + "(1, 1, 1),(1, 3, 1),(1, 8, 4)");
+            }
+        }
     }
 }

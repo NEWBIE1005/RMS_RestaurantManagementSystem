@@ -73,6 +73,7 @@
 
         <div class="actions-row">
             <a href="gdChinhKH.jsp" class="btn btn-primary">OK - Về Trang chủ Khách hàng</a>
+            <a href="gdLichSuDon.jsp?keyword=<%= java.net.URLEncoder.encode(savedOrder.getOrderCode(), "UTF-8") %>" class="btn btn-success">Theo dõi trạng thái đơn</a>
             <a href="gdTimBanDat.jsp" class="btn btn-secondary">Đặt món cho bàn khác</a>
         </div>
     </div>

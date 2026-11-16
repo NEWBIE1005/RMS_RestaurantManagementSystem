@@ -6,6 +6,10 @@
         return;
     }
     Dish updatedDish = (Dish) session.getAttribute("updatedDish");
+    String flashTitle = (String) session.getAttribute("flashActionTitle");
+    if (flashTitle == null || flashTitle.isEmpty()) {
+        flashTitle = "Cập nhật thông tin món ăn thành công!";
+    }
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -26,7 +30,7 @@
 <div class="container">
     <div class="card">
         <div class="alert alert-success">
-            <strong>Cập nhật thông tin món ăn thành công!</strong> Dữ liệu mới đã được lưu vào cơ sở dữ liệu.
+            <strong><%= FormatUtil.escapeHtml(flashTitle) %></strong> Dữ liệu mới đã được lưu vào cơ sở dữ liệu.
         </div>
 
         <% if (updatedDish != null) { %>

@@ -27,7 +27,7 @@
         <div class="page-header">
             <div>
                 <h1>Trang chủ Nhân viên Quản lý</h1>
-                <p class="subtitle">Lựa chọn chức năng quản trị hệ thống nhà hàng</p>
+                <p class="subtitle">Điều hành thực đơn món ăn, combo ưu đãi và báo cáo kinh doanh nhà hàng</p>
             </div>
         </div>
 
@@ -35,25 +35,25 @@
             <div class="menu-tile active-module">
                 <div>
                     <h3>Quản lý thông tin món ăn</h3>
-                    <p>Thêm, tìm kiếm, chỉnh sửa và cập nhật trạng thái các món ăn trong thực đơn nhà hàng.</p>
+                    <p>Thêm mới món ăn, tra cứu theo tên, cập nhật giá bán, mô tả và trạng thái phục vụ.</p>
                 </div>
-                <a href="gdQuanLyMonAn.jsp" class="btn btn-primary">Chọn Quản lý món ăn</a>
+                <a href="gdQuanLyMonAn.jsp" class="btn btn-primary">Mở chức năng</a>
             </div>
 
             <div class="menu-tile">
                 <div>
                     <h3>Tạo thực đơn Combo</h3>
-                    <p>Kết hợp các món ăn đơn lẻ thành thực đơn Combo với mức giá ưu đãi.</p>
+                    <p>Thiết kế các gói Combo nhiều món kèm tỷ lệ ưu đãi, tự động tính giá bán thực tế.</p>
                 </div>
-                <button type="button" class="btn btn-secondary" disabled>Chức năng mở rộng</button>
+                <a href="gdQuanLyCombo.jsp" class="btn btn-primary">Quản lý Combo</a>
             </div>
 
             <div class="menu-tile">
                 <div>
                     <h3>Xem báo cáo thống kê</h3>
-                    <p>Thống kê doanh thu món ăn, nguyên liệu tiêu thụ, khách hàng và nhà cung cấp.</p>
+                    <p>Tổng hợp số liệu món ăn bán chạy, tồn kho nguyên liệu, khách hàng và nhà cung cấp.</p>
                 </div>
-                <button type="button" class="btn btn-secondary" disabled>Chức năng mở rộng</button>
+                <a href="gdThongKe.jsp" class="btn btn-primary">Xem thống kê</a>
             </div>
         </div>
     </div>

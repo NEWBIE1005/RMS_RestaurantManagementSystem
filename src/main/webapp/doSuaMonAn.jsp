@@ -14,52 +14,59 @@
         id = Integer.parseInt(request.getParameter("id"));
         categoryId = Integer.parseInt(request.getParameter("categoryId"));
         price = Float.parseFloat(request.getParameter("price"));
-    } catch (Exception e) {
-        request.setAttribute("errMsg", "Dữ liệu số (ID, loại món hoặc đơn giá) không hợp lệ!");
-        request.getRequestDispatcher("gdSuaMonAn.jsp?id=" + request.getParameter("id")).forward(request, response);
-        return;
-    }
+    } catch (Exception ignored) {}
 
-    String name = request.getParameter("name");
-    String unit = request.getParameter("unit");
-    String status = request.getParameter("status");
-    String description = request.getParameter("description");
-
-    if (name == null || name.trim().isEmpty() || price <= 0 || unit == null || unit.trim().isEmpty()) {
-        request.setAttribute("errMsg", "Tên món, đơn vị tính không được để trống và đơn giá phải > 0!");
-        request.getRequestDispatcher("gdSuaMonAn.jsp?id=" + id).forward(request, response);
-        return;
-    }
-
-    DishDAO dishDAO = new DishDAO();
-    if (dishDAO.checkDuplicateName(id, name)) {
-        request.setAttribute("errMsg", "Tên món ăn đã tồn tại trong hệ thống, vui lòng chọn tên khác!");
-        request.getRequestDispatcher("gdSuaMonAn.jsp?id=" + id).forward(request, response);
-        return;
-    }
-
-    Dish dish = dishDAO.getDishById(id);
-    if (dish == null) {
-        response.sendRedirect("gdTimKiemMonAn.jsp");
-        return;
-    }
+    String code = request.getParameter("code") != null ? request.getParameter("code").trim() : "";
+    String name = request.getParameter("name") != null ? request.getParameter("name").trim() : "";
+    String unit = request.getParameter("unit") != null ? request.getParameter("unit").trim() : "Đĩa";
+    String status = request.getParameter("status") != null ? request.getParameter("status").trim() : "Đang phục vụ";
+    String description = request.getParameter("description") != null ? request.getParameter("description").trim() : "";
 
     Category cat = new Category();
     cat.setId(categoryId);
-    dish.setName(name.trim());
-    dish.setPrice(price);
-    dish.setUnit(unit.trim());
-    dish.setStatus(status);
-    dish.setDescription(description != null ? description.trim() : "");
-    dish.setCategory(cat);
+    for (Category c : new CategoryDAO().getAllCategories()) {
+        if (c.getId() == categoryId) { cat = c; break; }
+    }
 
-    boolean ok = dishDAO.updateDish(dish);
+    Dish monan = new Dish();
+    monan.setId(id);
+    monan.setCode(code);
+    monan.setName(name);
+    monan.setCategory(cat);
+    monan.setPrice(price);
+    monan.setUnit(unit.isEmpty() ? "Đĩa" : unit);
+    monan.setStatus(status);
+    monan.setDescription(description);
+
+    DishDAO dishDAO = new DishDAO();
+    if (name.isEmpty()) {
+        request.setAttribute("errMsg", "Tên món ăn không được để trống!");
+        request.setAttribute("editedDish", monan);
+        request.getRequestDispatcher("gdSuaMonAn.jsp?id=" + id).forward(request, response);
+        return;
+    }
+    if (price <= 0) {
+        request.setAttribute("errMsg", "Đơn giá món ăn phải lớn hơn 0!");
+        request.setAttribute("editedDish", monan);
+        request.getRequestDispatcher("gdSuaMonAn.jsp?id=" + id).forward(request, response);
+        return;
+    }
+    if (dishDAO.checkDuplicateName(id, name)) {
+        request.setAttribute("errMsg", "Tên món ăn \"" + name + "\" đã trùng với một món khác trong thực đơn!");
+        request.setAttribute("editedDish", monan);
+        request.getRequestDispatcher("gdSuaMonAn.jsp?id=" + id).forward(request, response);
+        return;
+    }
+
+    boolean ok = dishDAO.updateDish(monan);
     if (ok) {
-        Dish updated = dishDAO.getDishById(id);
-        session.setAttribute("updatedDish", updated);
+        Dish reloaded = dishDAO.getDishById(id);
+        session.setAttribute("updatedDish", reloaded != null ? reloaded : monan);
+        session.setAttribute("flashActionTitle", "Cập nhật thông tin món ăn thành công!");
         response.sendRedirect("gdThongBao.jsp");
     } else {
-        request.setAttribute("errMsg", "Cập nhật vào cơ sở dữ liệu thất bại, vui lòng thử lại!");
+        request.setAttribute("errMsg", "Cập nhật không thành công. Vui lòng thử lại!");
+        request.setAttribute("editedDish", monan);
         request.getRequestDispatcher("gdSuaMonAn.jsp?id=" + id).forward(request, response);
     }
 %>

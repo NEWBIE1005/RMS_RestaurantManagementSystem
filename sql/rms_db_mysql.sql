@@ -219,3 +219,29 @@ INSERT INTO tblReservation (id, customerId, tableId, bookingTime, numberOfGuests
 (1, 4, 3, '2026-11-16 19:30:00', 5, 'Đã xác nhận', 'Khách yêu cầu ghế trẻ em'),
 (2, 4, 2, '2026-11-17 12:00:00', 4, 'Đã xác nhận', 'Đặt ăn trưa cùng đồng nghiệp'),
 (3, 5, 4, '2026-11-16 20:00:00', 7, 'Đã xác nhận', 'Sinh nhật gia đình');
+
+INSERT INTO tblSupplier (id, name, address, phone, email, taxCode) VALUES
+(1, 'Công ty Hải Sản Biển Đông', 'Q. Hai Bà Trưng, Hà Nội', '0243888999', 'haisan@biendong.vn', '0108112233'),
+(2, 'Nông Sản Sạch Cao Nguyên', 'H. Hoài Đức, Hà Nội', '0243777666', 'sales@nongsan.vn', '0109223344'),
+(3, 'Thực Phẩm Nhập Khẩu Á Châu', 'Q. Cầu Giấy, Hà Nội', '0243555444', 'contact@achaufood.vn', '0107334455');
+
+INSERT INTO tblIngredient (id, code, name, unit, unitPrice, stockQuantity, minStockThreshold) VALUES
+(1, 'NL01', 'Tôm sú tươi size 25', 'kg', 290000, 18.5, 5.0),
+(2, 'NL02', 'Thịt bò Fuji cắt lát', 'kg', 420000, 12.0, 4.0),
+(3, 'NL03', 'Rau muống & Cải thảo lẩu', 'kg', 28000, 3.5, 5.0),
+(4, 'NL04', 'Gạch cua đồng tươi', 'kg', 165000, 8.0, 3.0),
+(5, 'NL05', 'Đào ngâm & Trà đen đặc biệt', 'hộp', 65000, 14.0, 4.0);
+
+INSERT INTO tblImportReceipt (id, receiptCode, supplierId, staffId, importDate, totalAmount, note) VALUES
+(1, 'PN-261116-01', 1, 3, '2026-11-16 07:30:00', 5365000, 'Nhập hải sản tươi đầu ngày');
+
+INSERT INTO tblImportDetail (id, receiptId, ingredientId, quantity, importPrice, subTotal) VALUES
+(1, 1, 1, 18.5, 290000, 5365000);
+
+INSERT INTO tblCombo (id, name, discountRate, totalPrice, description) VALUES
+(1, 'Combo Tiệc Lẩu Nướng 4 Người', 15, 709750, 'Gồm 1 Nồi Lẩu Thái Hải Sản, 1 Bò Fuji Nướng Đá, 4 Trà Đào Cam Sả');
+
+INSERT INTO tblComboDish (id, comboId, dishId, quantity) VALUES
+(1, 1, 1, 1),
+(2, 1, 3, 1),
+(3, 1, 8, 4);

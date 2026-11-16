@@ -3,10 +3,10 @@ skinparam classAttributeIconSize 0
 skinparam monochrome true
 skinparam shadowing false
 skinparam linetype ortho
-skinparam nodesep 45
-skinparam ranksep 55
+skinparam nodesep 38
+skinparam ranksep 48
 
-title HÌNH 4.1: BIỂU ĐỒ THIẾT KẾ LỚP THỰC THỂ TOÀN HỆ THỐNG RMS\n(Bổ sung id, kiểu dữ liệu Java, hợp thành & thuộc tính đối tượng)
+title HÌNH 4.1: BIỂU ĐỒ THIẾT KẾ LỚP THỰC THỂ TOÀN HỆ THỐNG RMS\n(Bổ sung id, kiểu dữ liệu Java, lớp chuyên biệt/thống kê, hợp thành & thuộc tính đối tượng)
 
 class User {
     - id : int
@@ -25,10 +25,24 @@ class Staff {
     - salary : float
 }
 
+class ManagementStaff {
+}
+
+class WarehouseStaff {
+}
+
+class SaleStaff {
+}
+
 class Customer {
     - customerCode : String
     - membershipLevel : String
     - rewardPoints : int
+}
+
+class CustomerStat {
+    - totalReservations : int
+    - totalSpent : float
 }
 
 class Category {
@@ -49,6 +63,11 @@ class Dish {
     - status : String
     - image : String
     - category : Category
+}
+
+class DishStat {
+    - totalOrderedQty : int
+    - totalRevenue : float
 }
 
 class Combo {
@@ -109,7 +128,7 @@ class Bill {
     - id : int
     - billCode : String
     - orderOnline : OrderOnline
-    - staff : Staff
+    - staff : SaleStaff
     - paymentTime : Date
     - totalAmount : float
     - discount : float
@@ -127,6 +146,11 @@ class Ingredient {
     - minStockThreshold : float
 }
 
+class IngredientStat {
+    - totalImportedQty : float
+    - totalImportCost : float
+}
+
 class Supplier {
     - id : int
     - name : String
@@ -136,11 +160,16 @@ class Supplier {
     - taxCode : String
 }
 
+class SupplierStat {
+    - totalReceipts : int
+    - totalSupplyValue : float
+}
+
 class ImportReceipt {
     - id : int
     - receiptCode : String
     - supplier : Supplier
-    - staff : Staff
+    - staff : WarehouseStaff
     - importDate : Date
     - totalAmount : float
     - note : String
@@ -157,6 +186,14 @@ class ImportDetail {
 
 Staff --|> User
 Customer --|> User
+ManagementStaff --|> Staff
+WarehouseStaff --|> Staff
+SaleStaff --|> Staff
+
+CustomerStat --|> Customer
+Dish <|-- DishStat
+IngredientStat --|> Ingredient
+SupplierStat --|> Supplier
 
 Category "1" o-- "0..*" Dish
 Combo "1" *-- "1..*" ComboDish
@@ -170,10 +207,10 @@ OrderOnline "1" *-- "1..*" OrderedDish
 OrderedDish "0..*" --> "1" Dish
 
 OrderOnline "1" -- "0..1" Bill
-Staff "1" -- "0..*" Bill
+SaleStaff "1" -- "0..*" Bill
 
 Supplier "1" -- "0..*" ImportReceipt
-Staff "1" -- "0..*" ImportReceipt
+WarehouseStaff "1" -- "0..*" ImportReceipt
 ImportReceipt "1" *-- "1..*" ImportDetail
 ImportDetail "0..*" --> "1" Ingredient
 

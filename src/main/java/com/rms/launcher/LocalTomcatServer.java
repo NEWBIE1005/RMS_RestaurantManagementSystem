@@ -19,6 +19,18 @@ public class LocalTomcatServer {
         String workDir = new File("target/tomcat-work").getAbsolutePath();
         new File(workDir).mkdirs();
 
+        // Mặc định dùng H2 dạng file cục bộ để lưu trữ bền vững dữ liệu thực tế (trừ khi truyền mysql hoặc rms.db.url)
+        if (System.getProperty("rms.db.url") == null
+                && !"mysql".equalsIgnoreCase(System.getProperty("rms.db.mode"))) {
+            File dataDir = new File("data");
+            if (!dataDir.exists()) {
+                dataDir.mkdirs();
+            }
+            String fileDbUrl = "jdbc:h2:file:" + new File(dataDir, "rms_db").getAbsolutePath().replace('\\', '/')
+                    + ";MODE=MySQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE";
+            System.setProperty("rms.db.url", fileDbUrl);
+        }
+
         // Khởi tạo kết nối CSDL & dữ liệu mẫu trước khi mở HTTP server
         DAO.initConnection();
 

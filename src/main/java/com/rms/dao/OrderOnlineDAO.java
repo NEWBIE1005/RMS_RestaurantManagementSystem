@@ -26,19 +26,37 @@ public class OrderOnlineDAO extends DAO {
             return false;
         }
 
+        // Kiểm tra lại đơn giá & trạng thái món trực tiếp từ CSDL để bảo đảm tính chính xác
+        String sqlCheckDish = "SELECT price, status FROM tblDish WHERE id = ?";
         float total = 0f;
         for (OrderedDish item : order.getDsMonGoi()) {
-            if (item == null || item.getDish() == null || item.getQuantity() <= 0) {
+            if (item == null || item.getDish() == null || item.getDish().getId() <= 0 || item.getQuantity() <= 0) {
                 return false;
             }
-            total += item.getPrice() * item.getQuantity();
+            try (PreparedStatement psCheck = con.prepareStatement(sqlCheckDish)) {
+                psCheck.setInt(1, item.getDish().getId());
+                try (ResultSet rsCheck = psCheck.executeQuery()) {
+                    if (!rsCheck.next()) {
+                        return false;
+                    }
+                    if (!"Đang phục vụ".equalsIgnoreCase(rsCheck.getString("status"))) {
+                        return false;
+                    }
+                    float dbPrice = rsCheck.getFloat("price");
+                    item.setPrice(dbPrice);
+                    total += dbPrice * item.getQuantity();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return false;
+            }
         }
         order.setTotalAmount(total);
         if (order.getOrderTime() == null) {
             order.setOrderTime(new Date());
         }
         if (order.getOrderCode() == null || order.getOrderCode().trim().isEmpty()) {
-            order.setOrderCode("ORD-" + System.currentTimeMillis());
+            order.setOrderCode(generateUniqueOrderCode());
         }
         if (order.getStatus() == null || order.getStatus().trim().isEmpty()) {
             order.setStatus("Chờ xác nhận");
@@ -107,5 +125,132 @@ public class OrderOnlineDAO extends DAO {
                 }
             }
         }
+    }
+
+    /**
+     * Sinh mã đơn gọi món online duy nhất theo thời gian thực.
+     */
+    public static synchronized String generateUniqueOrderCode() {
+        String ts = new java.text.SimpleDateFormat("yyMMddHHmmss").format(new java.util.Date());
+        int rand = new java.util.Random().nextInt(900) + 100;
+        return "ORD-" + ts + "-" + rand;
+    }
+
+    /**
+     * Lấy danh sách đơn gọi món online (dùng cho Nhân viên Bán hàng & tra cứu lịch sử).
+     */
+    public java.util.ArrayList<OrderOnline> getOrdersByKeyword(String keyword) {
+        java.util.ArrayList<OrderOnline> result = new java.util.ArrayList<>();
+        String clean = keyword == null ? "" : keyword.trim();
+        String sql = "SELECT o.id, o.orderCode, o.orderTime, o.totalAmount, o.status, o.note, "
+                + "r.id AS resId, r.bookingTime, r.numberOfGuests, r.status AS resStatus, "
+                + "t.id AS tableId, t.tableNumber, t.capacity, t.floor, "
+                + "u.id AS cusId, u.fullName, u.phone "
+                + "FROM tblOrderOnline o "
+                + "JOIN tblReservation r ON o.reservationId = r.id "
+                + "JOIN tblTable t ON r.tableId = t.id "
+                + "JOIN tblCustomer c ON r.customerId = c.userId "
+                + "JOIN tblUser u ON c.userId = u.id "
+                + (!clean.isEmpty()
+                    ? "WHERE LOWER(o.orderCode) LIKE LOWER(?) OR u.phone LIKE ? OR LOWER(u.fullName) LIKE LOWER(?) "
+                    : "")
+                + "ORDER BY o.orderTime DESC, o.id DESC";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            if (!clean.isEmpty()) {
+                String p = "%" + clean + "%";
+                ps.setString(1, p);
+                ps.setString(2, p);
+                ps.setString(3, p);
+            }
+            OrderedDishDAO odDAO = new OrderedDishDAO();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    OrderOnline ord = mapOrderOnline(rs);
+                    ord.setDsMonGoi(odDAO.getOrderedDishesByOrderId(ord.getId()));
+                    result.add(ord);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public java.util.ArrayList<OrderOnline> getAllOrders(String statusFilter) {
+        java.util.ArrayList<OrderOnline> result = new java.util.ArrayList<>();
+        boolean hasFilter = statusFilter != null && !statusFilter.trim().isEmpty() && !"ALL".equalsIgnoreCase(statusFilter.trim());
+        String sql = "SELECT o.id, o.orderCode, o.orderTime, o.totalAmount, o.status, o.note, "
+                + "r.id AS resId, r.bookingTime, r.numberOfGuests, r.status AS resStatus, "
+                + "t.id AS tableId, t.tableNumber, t.capacity, t.floor, "
+                + "u.id AS cusId, u.fullName, u.phone "
+                + "FROM tblOrderOnline o "
+                + "JOIN tblReservation r ON o.reservationId = r.id "
+                + "JOIN tblTable t ON r.tableId = t.id "
+                + "JOIN tblCustomer c ON r.customerId = c.userId "
+                + "JOIN tblUser u ON c.userId = u.id "
+                + (hasFilter ? "WHERE o.status = ? " : "")
+                + "ORDER BY o.orderTime DESC, o.id DESC";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            if (hasFilter) {
+                ps.setString(1, statusFilter.trim());
+            }
+            OrderedDishDAO odDAO = new OrderedDishDAO();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    OrderOnline ord = mapOrderOnline(rs);
+                    ord.setDsMonGoi(odDAO.getOrderedDishesByOrderId(ord.getId()));
+                    result.add(ord);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public boolean updateOrderStatus(int orderId, String newStatus) {
+        if (orderId <= 0 || newStatus == null || newStatus.trim().isEmpty()) {
+            return false;
+        }
+        String sql = "UPDATE tblOrderOnline SET status = ? WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, newStatus.trim());
+            ps.setInt(2, orderId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private OrderOnline mapOrderOnline(ResultSet rs) throws Exception {
+        com.rms.model.Customer cus = new com.rms.model.Customer();
+        cus.setId(rs.getInt("cusId"));
+        cus.setFullName(rs.getString("fullName"));
+        cus.setPhone(rs.getString("phone"));
+
+        com.rms.model.Table tbl = new com.rms.model.Table();
+        tbl.setId(rs.getInt("tableId"));
+        tbl.setTableNumber(rs.getString("tableNumber"));
+        tbl.setCapacity(rs.getInt("capacity"));
+        tbl.setFloor(rs.getInt("floor"));
+
+        com.rms.model.Reservation res = new com.rms.model.Reservation();
+        res.setId(rs.getInt("resId"));
+        res.setBookingTime(rs.getTimestamp("bookingTime"));
+        res.setNumberOfGuests(rs.getInt("numberOfGuests"));
+        res.setStatus(rs.getString("resStatus"));
+        res.setCustomer(cus);
+        res.setTable(tbl);
+
+        OrderOnline ord = new OrderOnline();
+        ord.setId(rs.getInt("id"));
+        ord.setOrderCode(rs.getString("orderCode"));
+        ord.setOrderTime(rs.getTimestamp("orderTime"));
+        ord.setTotalAmount(rs.getFloat("totalAmount"));
+        ord.setStatus(rs.getString("status"));
+        ord.setNote(rs.getString("note"));
+        ord.setReservation(res);
+        return ord;
     }
 }

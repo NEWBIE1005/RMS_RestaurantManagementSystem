@@ -142,4 +142,90 @@ public class DishDAO extends DAO {
         d.setCategory(c);
         return d;
     }
+
+    /**
+     * Kiểm tra trùng mã món ăn (code).
+     */
+    public boolean checkDuplicateCode(String code) {
+        if (code == null || code.trim().isEmpty()) return false;
+        String sql = "SELECT COUNT(*) FROM tblDish WHERE UPPER(code) = UPPER(?)";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, code.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Thêm món ăn mới vào thực đơn (tblDish).
+     */
+    public boolean insertDish(Dish d) {
+        if (d == null || d.getCode() == null || d.getCode().trim().isEmpty()
+                || d.getName() == null || d.getName().trim().isEmpty()
+                || d.getPrice() <= 0 || d.getCategory() == null || d.getCategory().getId() <= 0) {
+            return false;
+        }
+        if (checkDuplicateCode(d.getCode()) || checkDuplicateName(0, d.getName())) {
+            return false;
+        }
+        String sql = "INSERT INTO tblDish (categoryId, code, name, price, unit, description, status, image) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, d.getCategory().getId());
+            ps.setString(2, d.getCode().trim().toUpperCase());
+            ps.setString(3, d.getName().trim());
+            ps.setFloat(4, d.getPrice());
+            ps.setString(5, (d.getUnit() != null && !d.getUnit().trim().isEmpty()) ? d.getUnit().trim() : "Đĩa");
+            ps.setString(6, d.getDescription() != null ? d.getDescription().trim() : "");
+            ps.setString(7, (d.getStatus() != null && !d.getStatus().trim().isEmpty()) ? d.getStatus().trim() : "Đang phục vụ");
+            ps.setString(8, d.getImage() != null ? d.getImage().trim() : "");
+            int affected = ps.executeUpdate();
+            if (affected > 0) {
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        d.setId(keys.getInt(1));
+                    }
+                }
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Xóa món ăn nếu chưa phát sinh trong đơn gọi/combo, ngược lại chuyển trạng thái 'Ngừng phục vụ'.
+     */
+    public String deleteOrDeactivateDish(int dishId) {
+        if (dishId <= 0) return "ERROR";
+        try {
+            int refCount = 0;
+            try (PreparedStatement ps1 = con.prepareStatement("SELECT COUNT(*) FROM tblOrderedDish WHERE dishId = ?");
+                 PreparedStatement ps2 = con.prepareStatement("SELECT COUNT(*) FROM tblComboDish WHERE dishId = ?")) {
+                ps1.setInt(1, dishId);
+                try (ResultSet rs = ps1.executeQuery()) { if (rs.next()) refCount += rs.getInt(1); }
+                ps2.setInt(1, dishId);
+                try (ResultSet rs = ps2.executeQuery()) { if (rs.next()) refCount += rs.getInt(1); }
+            }
+            if (refCount > 0) {
+                try (PreparedStatement psUp = con.prepareStatement("UPDATE tblDish SET status = 'Ngừng phục vụ' WHERE id = ?")) {
+                    psUp.setInt(1, dishId);
+                    return psUp.executeUpdate() > 0 ? "DEACTIVATED" : "ERROR";
+                }
+            } else {
+                try (PreparedStatement psDel = con.prepareStatement("DELETE FROM tblDish WHERE id = ?")) {
+                    psDel.setInt(1, dishId);
+                    return psDel.executeUpdate() > 0 ? "DELETED" : "ERROR";
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "ERROR";
+        }
+    }
 }

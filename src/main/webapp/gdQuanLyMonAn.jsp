@@ -5,10 +5,18 @@
         response.sendRedirect("gddangnhap.jsp?err=timeout");
         return;
     }
-    String action = request.getParameter("chucNang");
-    if ("edit".equals(action)) {
-        response.sendRedirect("gdTimKiemMonAn.jsp");
-        return;
+    if ("POST".equalsIgnoreCase(request.getMethod())) {
+        String actionType = request.getParameter("actionType");
+        if ("add".equals(actionType)) {
+            response.sendRedirect("gdThemMonAn.jsp");
+            return;
+        } else if ("manage".equals(actionType)) {
+            response.sendRedirect("gdTimKiemMonAn.jsp?mode=manage");
+            return;
+        } else {
+            response.sendRedirect("gdTimKiemMonAn.jsp");
+            return;
+        }
     }
 %>
 <!DOCTYPE html>
@@ -31,40 +39,42 @@
     <div class="card">
         <div class="page-header">
             <div>
-                <h1>Quản lý thông tin món ăn</h1>
-                <p class="subtitle">Module 1 - Bước 2: Chọn chức năng thao tác với thực đơn món ăn</p>
+                <h1>Menu Quản lý thông tin món ăn</h1>
+                <p class="subtitle">Chọn tác vụ thao tác với danh mục món ăn trong thực đơn nhà hàng</p>
             </div>
-            <a href="gdChinhNVQL.jsp" class="btn btn-secondary btn-sm">Quay lại</a>
+            <a href="gdChinhNVQL.jsp" class="btn btn-secondary">Quay lại</a>
         </div>
 
-        <form action="gdQuanLyMonAn.jsp" method="get">
-            <label class="radio-card">
-                <input type="radio" name="chucNang" value="add" disabled>
-                <div>
-                    <strong>Thêm món ăn mới</strong>
-                    <div class="subtitle">Bổ sung món mới vào danh mục thực đơn (Ngoài phạm vi demo)</div>
-                </div>
-            </label>
+        <form action="gdQuanLyMonAn.jsp" method="post">
+            <div class="grid-cards">
+                <label class="menu-tile active-module" style="cursor: pointer;">
+                    <div>
+                        <input type="radio" name="actionType" value="edit" checked> <strong>Sửa thông tin món ăn</strong>
+                        <p style="margin-top: 8px;">Tìm kiếm món ăn theo tên và cập nhật đơn giá, thể loại, trạng thái phục vụ hoặc mô tả.</p>
+                    </div>
+                    <span class="badge badge-success">Cập nhật thực đơn</span>
+                </label>
 
-            <label class="radio-card" style="border-color: #d97706; background: #fffbeb;">
-                <input type="radio" name="chucNang" value="edit" checked>
-                <div>
-                    <strong>Sửa thông tin món ăn</strong>
-                    <div class="subtitle">Tìm kiếm món ăn theo tên và cập nhật tên, giá, đơn vị, thể loại, trạng thái</div>
-                </div>
-            </label>
+                <label class="menu-tile" style="cursor: pointer;">
+                    <div>
+                        <input type="radio" name="actionType" value="add"> <strong>Thêm món ăn mới</strong>
+                        <p style="margin-top: 8px;">Bổ sung món ăn mới vào thực đơn kèm mã món, thể loại, giá bán và mô tả chi tiết.</p>
+                    </div>
+                    <span class="badge badge-warn">Thêm món mới</span>
+                </label>
 
-            <label class="radio-card">
-                <input type="radio" name="chucNang" value="delete" disabled>
-                <div>
-                    <strong>Xóa món ăn</strong>
-                    <div class="subtitle">Ngừng kinh doanh hoặc xóa món ăn khỏi thực đơn (Ngoài phạm vi demo)</div>
-                </div>
-            </label>
+                <label class="menu-tile" style="cursor: pointer;">
+                    <div>
+                        <input type="radio" name="actionType" value="manage"> <strong>Ngừng bán / Xóa món ăn</strong>
+                        <p style="margin-top: 8px;">Tìm kiếm món ăn để tạm ngừng phục vụ hoặc xóa khỏi thực đơn nếu chưa có đơn gọi.</p>
+                    </div>
+                    <span class="badge badge-danger">Quản lý trạng thái</span>
+                </label>
+            </div>
 
-            <div class="actions-row">
+            <div class="actions-row" style="margin-top: 22px;">
                 <button type="submit" class="btn btn-primary">Tiếp tục</button>
-                <a href="gdChinhNVQL.jsp" class="btn btn-secondary">Quay lại Trang chủ</a>
+                <a href="gdChinhNVQL.jsp" class="btn btn-secondary">Về Trang chủ</a>
             </div>
         </form>
     </div>

@@ -3,8 +3,8 @@ skinparam linetype ortho
 skinparam monochrome true
 skinparam shadowing false
 skinparam roundCorner 4
-skinparam nodesep 45
-skinparam ranksep 45
+skinparam nodesep 50
+skinparam ranksep 52
 
 title HÌNH 4.2: BIỂU ĐỒ THIẾT KẾ CƠ SỞ DỮ LIỆU MYSQL (rms_db) TOÀN HỆ THỐNG RMS
 
@@ -171,24 +171,37 @@ entity "tblImportDetail" as tblImportDetail {
     * subTotal : DECIMAL(14,2)
 }
 
-tblUser ||--o| tblStaff
+together {
+    entity tblUser
+    entity tblStaff
+    entity tblCustomer
+}
+
+together {
+    entity tblSupplier
+    entity tblImportReceipt
+    entity tblImportDetail
+    entity tblIngredient
+}
+
+tblStaff |o--|| tblUser
 tblUser ||--o| tblCustomer
-tblCategory ||--o{ tblDish
-tblCombo ||--|{ tblComboDish
-tblDish ||--o{ tblComboDish
-
-tblCustomer ||--o{ tblReservation
-tblTable ||--o{ tblReservation
-tblReservation ||--o{ tblOrderOnline
-tblOrderOnline ||--|{ tblOrderedDish
-tblDish ||--o{ tblOrderedDish
-
-tblOrderOnline ||--o| tblBill
-tblStaff ||--o{ tblBill
 
 tblSupplier ||--o{ tblImportReceipt
 tblStaff ||--o{ tblImportReceipt
 tblImportReceipt ||--|{ tblImportDetail
 tblIngredient ||--o{ tblImportDetail
+
+tblCustomer ||--o{ tblReservation
+tblTable ||--o{ tblReservation
+tblReservation ||--o{ tblOrderOnline
+tblOrderOnline ||--o| tblBill
+tblStaff ||--o{ tblBill
+
+tblOrderOnline ||--|{ tblOrderedDish
+tblDish ||--o{ tblOrderedDish
+tblCategory ||--o{ tblDish
+tblCombo ||--|{ tblComboDish
+tblDish ||--o{ tblComboDish
 
 @enduml
