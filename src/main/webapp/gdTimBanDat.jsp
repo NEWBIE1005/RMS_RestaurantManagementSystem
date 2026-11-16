@@ -1,10 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*,com.rms.dao.ReservationDAO,com.rms.model.*,com.rms.util.FormatUtil"%>
 <%
     request.setCharacterEncoding("UTF-8");
+    Staff nvbh = (Staff) session.getAttribute("nvbh");
     Customer kh = (Customer) session.getAttribute("khachHang");
+    String homeHref = (nvbh != null) ? "gdChinhNVBH.jsp" : "gdChinhKH.jsp";
+    String homeLabel = (nvbh != null) ? "Trang chủ NVBH" : "Trang chủ KH";
     String keyword = request.getParameter("keyword");
     boolean searched = (keyword != null);
-    if (keyword == null && kh != null) {
+    if (keyword == null && kh != null && nvbh == null) {
         keyword = kh.getPhone();
         searched = true;
     }
@@ -30,10 +33,14 @@
 </head>
 <body>
 <div class="topbar">
-    <a class="brand" href="gdChinhKH.jsp"><span>RMS</span> Restaurant Online</a>
+    <a class="brand" href="<%= homeHref %>"><span>RMS</span> <%= (nvbh != null) ? "Restaurant Sale" : "Restaurant Online" %></a>
     <div class="user-info">
-        <a href="gdDatBan.jsp" class="btn btn-success btn-sm">Đặt bàn mới</a>
-        <a href="gdChinhKH.jsp" class="btn btn-secondary btn-sm">Trang chủ KH</a>
+        <% if (nvbh != null) { %>
+            <span>NVBH: <strong><%= FormatUtil.escapeHtml(nvbh.getFullName()) %></strong></span>
+        <% } else { %>
+            <a href="gdDatBan.jsp" class="btn btn-success btn-sm">Đặt bàn mới</a>
+        <% } %>
+        <a href="<%= homeHref %>" class="btn btn-secondary btn-sm"><%= homeLabel %></a>
     </div>
 </div>
 
@@ -42,9 +49,9 @@
         <div class="page-header">
             <div>
                 <h1>Tìm bàn đã đặt để gọi món Online</h1>
-                <p class="subtitle">Nhập Tên khách hàng hoặc Số điện thoại đã đặt bàn để chọn bàn trước khi gọi món</p>
+                <p class="subtitle">Nhập Tên khách hàng hoặc Số điện thoại khách cung cấp để tìm bàn trước khi chọn món</p>
             </div>
-            <a href="gdChinhKH.jsp" class="btn btn-secondary">Quay lại</a>
+            <a href="<%= homeHref %>" class="btn btn-secondary">Quay lại</a>
         </div>
 
         <form class="search-bar" action="gdTimBanDat.jsp" method="get">

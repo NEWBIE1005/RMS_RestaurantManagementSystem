@@ -2,20 +2,20 @@
 skinparam monochrome true
 skinparam shadowing false
 
-title HÌNH 4.13: BIỂU ĐỒ THIẾT KẾ HOẠT ĐỘNG MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
+title HÌNH 4.13: BIỂU ĐỒ THIẾT KẾ HOẠT ĐỘNG MODULE 2 - ĐẶT MÓN ONLINE CHO KHÁCH HÀNG
 
-|Xử lí tại gdChinhKH.jsp|
+|Xử lí tại gdChinhNVBH.jsp|
 start
-:Hiển thị trang chủ Khách hàng;
-:Click chọn menu Đặt món online;
+:Hiển thị trang chủ NV Bán hàng;
+:NVBH click menu Đặt món online cho khách;
 
 |Xử lí tại gdTimBanDat.jsp|
 :Hiển thị GD tìm bàn đặt;
-:Nhập tên khách hàng hoặc SĐT;
+:NVBH nhập tên hoặc SĐT khách hàng cung cấp;
 :Click Tìm bàn;
 :ReservationDAO: searchBookedTables(keyword);
-:Hiển thị danh sách bàn đã đặt;
-:Click chọn bàn của mình;
+:Hiển thị danh sách bàn đã đặt của khách;
+:NVBH click chọn bàn đặt của khách;
 
 |Xử lí tại gdChonMonOnline.jsp|
 :ReservationDAO: getReservationById(id);
@@ -24,21 +24,21 @@ start
 :Hiển thị GD chọn món online;
 
 repeat
-  :Nhập tên món hoặc chọn loại món;
+  :NVBH nhập tên hoặc chọn loại món khách yêu cầu;
   :Click Tìm món;
   :DishDAO: searchDish(name, categoryId);
   :Hiển thị danh sách món kết quả;
-  :Chọn 1 món & nhập số lượng;
+  :Chọn món & nhập số lượng khách đặt;
   :Click Thêm vào đơn;
   :Tạo OrderedDish & cập nhật dsMonGoi (Session);
-repeat while (Còn muốn gọi thêm món?) is (Có)
+repeat while (Khách còn muốn gọi thêm món?) is (Có)
 ->Không;
 
 :Click Xác nhận danh sách món;
 
 |Xử lí tại gdXacNhanGoiMon.jsp|
 :Hiển thị thông tin bàn, danh sách món & tổng tiền;
-:Nhập ghi chú (nếu có) & click Xác nhận đặt món;
+:Nhập ghi chú yêu cầu của khách & click Xác nhận đặt món;
 
 |Xử lí tại doLuuGoiMon.jsp|
 :Đóng gói đối tượng OrderOnline;
@@ -52,7 +52,7 @@ end note
 :Xóa giỏ món tạm trong Session;
 
 |Xử lí tại gdThongBaoGoiMon.jsp|
-:Hiển thị mã đơn gọi món & thông báo thành công;
+:Hiển thị mã đơn gọi món & thông báo thành công cho NVBH/Khách;
 stop
 
 @enduml

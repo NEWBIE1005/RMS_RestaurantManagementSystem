@@ -60,9 +60,10 @@ Sale -- UC_PayAtTable
 Sale -- UC_MakeCard
 Sale -- UC_ConfirmRes
 Sale -- UC_ConfirmOrd
+Sale -- UC_OrderOnline
 
 Customer -- UC_Search
 Customer -- UC_BookTable
-Customer -- UC_OrderOnline
+UC_OrderOnline -- Customer
 
 @enduml

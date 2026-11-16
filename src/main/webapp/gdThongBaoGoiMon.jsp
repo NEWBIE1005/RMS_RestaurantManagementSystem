@@ -5,6 +5,9 @@
         response.sendRedirect("gdChinhKH.jsp");
         return;
     }
+    Staff nvbh = (Staff) session.getAttribute("nvbh");
+    String homeHref = (nvbh != null) ? "gdChinhNVBH.jsp" : "gdChinhKH.jsp";
+    String homeLabel = (nvbh != null) ? "OK - Về Trang chủ NV Bán hàng" : "OK - Về Trang chủ Khách hàng";
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -15,9 +18,9 @@
 </head>
 <body>
 <div class="topbar">
-    <a class="brand" href="gdChinhKH.jsp"><span>RMS</span> Restaurant Online</a>
+    <a class="brand" href="<%= homeHref %>"><span>RMS</span> <%= (nvbh != null) ? "Restaurant Sale" : "Restaurant Online" %></a>
     <div class="user-info">
-        <a href="gdChinhKH.jsp" class="btn btn-secondary btn-sm">Trang chủ KH</a>
+        <a href="<%= homeHref %>" class="btn btn-secondary btn-sm"><%= (nvbh != null) ? "Trang chủ NVBH" : "Trang chủ KH" %></a>
     </div>
 </div>
 
@@ -72,7 +75,7 @@
         </div>
 
         <div class="actions-row">
-            <a href="gdChinhKH.jsp" class="btn btn-primary">OK - Về Trang chủ Khách hàng</a>
+            <a href="<%= homeHref %>" class="btn btn-primary"><%= homeLabel %></a>
             <a href="gdLichSuDon.jsp?keyword=<%= java.net.URLEncoder.encode(savedOrder.getOrderCode(), "UTF-8") %>" class="btn btn-success">Theo dõi trạng thái đơn</a>
             <a href="gdTimBanDat.jsp" class="btn btn-secondary">Đặt món cho bàn khác</a>
         </div>

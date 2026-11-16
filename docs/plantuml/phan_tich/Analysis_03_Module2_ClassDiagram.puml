@@ -7,12 +7,12 @@ skinparam packageStyle rectangle
 skinparam nodesep 40
 skinparam ranksep 55
 
-title HÌNH 3.7: BIỂU ĐỒ LỚP PHA PHÂN TÍCH - MODULE 2: KHÁCH HÀNG ĐẶT MÓN ONLINE
+title HÌNH 3.7: BIỂU ĐỒ LỚP PHA PHÂN TÍCH - MODULE 2: ĐẶT MÓN ONLINE CHO KHÁCH HÀNG
 
-class GDChinhKH <<boundary>> {
+class GDChinhNVBH <<boundary>> {
     - subDatMonOnline
-    - subDatBan
-    - subTimKiem
+    - subXacNhanDatBan
+    - subThanhToan
 }
 
 class GDTimBanDat <<boundary>> {
@@ -52,6 +52,12 @@ class User <<entity>> {
     - email
     - address
     - role
+}
+
+class Staff <<entity>> {
+    - staffCode
+    - position
+    - salary
 }
 
 class Customer <<entity>> {
@@ -111,11 +117,11 @@ class OrderOnline <<entity>> {
     + saveOrderOnline()
 }
 
-GDChinhKH -right-> GDTimBanDat
+GDChinhNVBH -right-> GDTimBanDat
 GDTimBanDat -right-> GDChonMonOnline
 GDChonMonOnline -right-> GDXacNhanGoiMon
 
-GDChinhKH -down-> Customer
+GDChinhNVBH -down-> Staff
 GDTimBanDat -down-> Reservation
 GDChonMonOnline -down-> Reservation
 GDChonMonOnline -down-> Category
@@ -123,6 +129,7 @@ GDChonMonOnline -down-> Dish
 GDChonMonOnline -down-> OrderedDish
 GDXacNhanGoiMon -down-> OrderOnline
 
+Staff -down-|> User
 Customer -down-|> User
 Customer "1" -- "0..*" Reservation
 Table "1" -- "0..*" Reservation

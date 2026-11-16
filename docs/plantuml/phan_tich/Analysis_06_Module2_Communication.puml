@@ -8,9 +8,10 @@ skinparam ranksep 75
 
 title HÌNH 3.12: BIỂU ĐỒ GIAO TIẾP (COMMUNICATION DIAGRAM) PHA PHÂN TÍCH - MODULE 2
 
-actor "Khách hàng" as KH
+actor "NV Bán hàng" as NVBH
+actor "Khách hàng\n(cung cấp thông tin)" as KH
 
-boundary "GDChinhKH" as GD1
+boundary "GDChinhNVBH" as GD1
 boundary "GDTimBanDat" as GD2
 boundary "GDChonMonOnline" as GD3
 boundary "GDXacNhanGoiMon" as GD4
@@ -21,10 +22,11 @@ entity "Dish" as Dish
 entity "OrderedDish" as Item
 entity "OrderOnline" as Ord
 
-KH -- GD1 : 1: chon Dat mon online ↓
-KH -- GD2 : 4: nhap ten/SDT & Tim ↓\n↑ 9: hien thi ban\n10: chon ban ↓
-KH -- GD3 : 16: [Lap] tim mon ↓\n↑ 21: hien thi ds mon\n22: chon & nhap SL ↓\n↑ 26: cap nhat ds\n27: Xac nhan ↓
-KH -- GD4 : 30: Xac nhan luu ↓\n↑ 35: bao thanh cong
+KH -- NVBH : Cung cấp Tên/SĐT\n& món cần đặt →
+NVBH -- GD1 : 1: chon Dat mon online ↓
+NVBH -- GD2 : 4: nhap ten/SDT & Tim ↓\n↑ 9: hien thi ban\n10: chon ban ↓
+NVBH -- GD3 : 16: [Lap] tim mon ↓\n↑ 21: hien thi ds mon\n22: chon & nhap SL ↓\n↑ 26: cap nhat ds\n27: Xac nhan ↓
+NVBH -- GD4 : 30: Xac nhan luu ↓\n↑ 35: bao thanh cong
 
 GD1 -right- GD2 : 2: goi →\n← 3: hien thi
 GD2 -right- GD3 : 11: goi (resId) →\n← 15: hien thi GD

@@ -4,24 +4,26 @@ skinparam packageStyle rectangle
 skinparam monochrome true
 skinparam shadowing false
 skinparam nodesep 22
-skinparam ranksep 65
+skinparam ranksep 60
 
-title HÌNH 3.3: BIỂU ĐỒ USE CASE CHI TIẾT MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
+title HÌNH 3.3: BIỂU ĐỒ USE CASE CHI TIẾT MODULE 2 - ĐẶT MÓN ONLINE CHO KHÁCH HÀNG
 
-actor "Khách hàng" as Customer
+actor "NV Bán hàng" as Sale
+actor "Khách hàng\n(cung cấp thông tin)" as Customer
 
-rectangle "Module 2: Khách hàng đặt món online" {
+rectangle "Module 2: Đặt món online" {
     usecase "Đặt món online" as UC_OrderOnline
     usecase "Chọn menu đặt món" as UC_ChooseMenu
     usecase "Tìm bàn đặt theo tên / SĐT" as UC_FindTable
-    usecase "Chọn bàn của mình" as UC_ChooseTable
+    usecase "Chọn bàn của khách" as UC_ChooseTable
     usecase "Tìm kiếm món ăn theo tên / loại" as UC_SearchDish
     usecase "Chọn món ăn và nhập số lượng" as UC_SelectQty
     usecase "Xóa / sửa món trong danh sách" as UC_ModifyItem
     usecase "Xác nhận và lưu đơn gọi món" as UC_ConfirmOrder
 }
 
-Customer -- UC_OrderOnline
+Sale -- UC_OrderOnline
+UC_OrderOnline -- Customer
 
 UC_OrderOnline ..> UC_ChooseMenu : <<include>>
 UC_OrderOnline ..> UC_FindTable : <<include>>
@@ -30,5 +32,11 @@ UC_OrderOnline ..> UC_SearchDish : <<include>>
 UC_OrderOnline ..> UC_SelectQty : <<include>>
 UC_OrderOnline ..> UC_ConfirmOrder : <<include>>
 UC_ModifyItem ..> UC_SelectQty : <<extend>>
+
+note right of Customer
+  Tác nhân phụ bên ngoài:
+  cung cấp Tên/SĐT đặt bàn
+  và danh sách món muốn gọi
+end note
 
 @enduml

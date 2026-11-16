@@ -102,6 +102,7 @@
         <% if (err != null) { %><div class="alert alert-danger"><%= FormatUtil.escapeHtml(err) %></div><% } %>
 
         <div class="actions-row" style="margin-top:0; margin-bottom:18px;">
+            <a href="gdTimBanDat.jsp" class="btn btn-success">+ Đặt món Online cho bàn khách đặt</a>
             <a href="gdChinhNVBH.jsp?tab=orders" class="btn <%= "orders".equals(tab) ? "btn-primary" : "btn-secondary" %>">Đơn đặt món Online &amp; Thanh toán</a>
             <a href="gdChinhNVBH.jsp?tab=reservations" class="btn <%= "reservations".equals(tab) ? "btn-primary" : "btn-secondary" %>">Quản lý Đặt bàn</a>
             <a href="gdChinhNVBH.jsp?tab=bills" class="btn <%= "bills".equals(tab) ? "btn-primary" : "btn-secondary" %>">Hóa đơn đã thanh toán</a>

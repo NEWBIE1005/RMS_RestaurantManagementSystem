@@ -5,13 +5,13 @@ skinparam defaultTextAlignment center
 hide circle
 hide empty members
 
-title HÌNH 4.7: THIẾT KẾ GIAO DIỆN MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
+title HÌNH 4.7: THIẾT KẾ GIAO DIỆN MODULE 2 - NV BÁN HÀNG ĐẶT MÓN ONLINE CHO KHÁCH
 
-package "gdChinhKH.jsp\n(Trang chủ Khách hàng)" as P0 {
-  class "Trang chủ Khách hàng\n--\n[Tìm kiếm món / bàn]\n[Đặt bàn trực tuyến]\n[Đặt món online] (click)" as UI0
+package "gdChinhNVBH.jsp\n(Trang chủ NV Bán hàng)" as P0 {
+  class "Quầy NV Bán hàng\n--\n[Đặt món online cho khách] (click)\n[Quản lý Đặt bàn]\n[Thanh toán & Hóa đơn]" as UI0
 }
 
-package "gdTimBanDat.jsp\n(Tìm bàn theo Tên / SĐT)" as P1 {
+package "gdTimBanDat.jsp\n(Tìm bàn khách đặt theo Tên / SĐT)" as P1 {
   class "Tìm bàn đã đặt\n--\nTên KH hoặc SĐT: [0987654321] [Tìm bàn]\n--\nBảng bàn đã đặt:\nSTT | Mã đặt | Khách hàng | Bàn | Giờ | Chọn\n1 | #RES-01 | Hà Anh Khôi | Bàn 08 | 19:30 | [Chọn]" as UI1
 }
 
@@ -24,13 +24,13 @@ package "gdXacNhanGoiMon.jsp\n(Xác nhận cuối danh sách)" as P3 {
 }
 
 package "gdThongBaoGoiMon.jsp\n(Thông báo lưu thành công)" as P4 {
-  class "Thông báo\n--\nĐặt món online thành công!\nMã đơn: #ORD-2026-001\n--\n[Về trang chủ]" as UI4
+  class "Thông báo\n--\nĐặt món online thành công!\nMã đơn: #ORD-261116-001\n--\n[Về Trang chủ NV Bán hàng]" as UI4
 }
 
 UI0 -right-> UI1 : click Đặt món online
 UI1 -down-> UI2 : click [Chọn] bàn đặt
 UI2 -right-> UI3 : click [Xác nhận danh sách món]
 UI3 -down-> UI4 : click [Xác nhận đặt món] (doLuuGoiMon.jsp)
-UI4 -up-> UI0 : về trang chủ
+UI4 -up-> UI0 : về trang chủ NVBH
 
 @enduml

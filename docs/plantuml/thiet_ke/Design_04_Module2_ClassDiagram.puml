@@ -7,12 +7,12 @@ skinparam packageStyle rectangle
 skinparam nodesep 25
 skinparam ranksep 45
 
-title HÌNH 4.8: BIỂU ĐỒ LỚP THIẾT KẾ CHI TIẾT MODULE 2 - KHÁCH HÀNG ĐẶT MÓN ONLINE
+title HÌNH 4.8: BIỂU ĐỒ LỚP THIẾT KẾ CHI TIẾT MODULE 2 - ĐẶT MÓN ONLINE CHO KHÁCH HÀNG
 
 package "Tầng Giao diện (View - JSP)" {
-    class gdChinhKH_jsp <<boundary>> {
+    class gdChinhNVBH_jsp <<boundary>> {
         - linkDatMonOnline : link
-        - khachHang : Customer
+        - nvbh : Staff
     }
 
     class gdTimBanDat_jsp <<boundary>> {
@@ -103,6 +103,12 @@ package "Tầng Thực thể (Model)" {
         - role : String
     }
 
+    class Staff <<entity>> {
+        - staffCode : String
+        - position : String
+        - salary : float
+    }
+
     class Customer <<entity>> {
         - customerCode : String
         - membershipLevel : String
@@ -167,7 +173,7 @@ package "Tầng Thực thể (Model)" {
     }
 }
 
-gdChinhKH_jsp -right-> gdTimBanDat_jsp
+gdChinhNVBH_jsp -right-> gdTimBanDat_jsp
 gdTimBanDat_jsp -right-> gdChonMonOnline_jsp
 gdChonMonOnline_jsp -right-> gdXacNhanGoiMon_jsp
 gdXacNhanGoiMon_jsp -down-> doLuuGoiMon_jsp
@@ -186,7 +192,7 @@ gdChonMonOnline_jsp -down..> DishDAO
 doLuuGoiMon_jsp -down..> OrderOnlineDAO
 OrderOnlineDAO -down..> OrderedDishDAO
 
-gdChinhKH_jsp -down-> Customer
+gdChinhNVBH_jsp -down-> Staff
 gdTimBanDat_jsp -down-> Reservation
 gdChonMonOnline_jsp -down-> OrderedDish
 gdXacNhanGoiMon_jsp -down-> OrderOnline
@@ -198,6 +204,7 @@ DishDAO -down-> Dish
 OrderOnlineDAO -down-> OrderOnline
 OrderedDishDAO -down-> OrderedDish
 
+Staff --|> User
 Customer --|> User
 Customer "1" -- "0..*" Reservation
 Table "1" -- "0..*" Reservation

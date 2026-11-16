@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*,com.rms.model.*,com.rms.util.FormatUtil"%>
 <%
     Reservation selectedRes = (Reservation) session.getAttribute("selectedRes");
+    Staff nvbh = (Staff) session.getAttribute("nvbh");
     @SuppressWarnings("unchecked")
     ArrayList<OrderedDish> dsMonDaGoi = (ArrayList<OrderedDish>) session.getAttribute("dsMonDaGoi");
 
@@ -24,7 +25,7 @@
 </head>
 <body>
 <div class="topbar">
-    <a class="brand" href="gdChinhKH.jsp"><span>RMS</span> Restaurant Online</a>
+    <a class="brand" href="<%= (nvbh != null) ? "gdChinhNVBH.jsp" : "gdChinhKH.jsp" %>"><span>RMS</span> <%= (nvbh != null) ? "Restaurant Sale" : "Restaurant Online" %></a>
     <div class="user-info">
         <a href="gdChonMonOnline.jsp" class="btn btn-secondary btn-sm">Quay lại chọn thêm món</a>
     </div>

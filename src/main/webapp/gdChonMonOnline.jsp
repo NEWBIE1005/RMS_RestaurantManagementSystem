@@ -3,6 +3,7 @@
     request.setCharacterEncoding("UTF-8");
 
     Reservation selectedRes = (Reservation) session.getAttribute("selectedRes");
+    Staff nvbh = (Staff) session.getAttribute("nvbh");
     String resIdParam = request.getParameter("resId");
     if (resIdParam != null && !resIdParam.isEmpty()) {
         try {
@@ -128,8 +129,9 @@
 </head>
 <body>
 <div class="topbar">
-    <a class="brand" href="gdChinhKH.jsp"><span>RMS</span> Restaurant Online</a>
+    <a class="brand" href="<%= (nvbh != null) ? "gdChinhNVBH.jsp" : "gdChinhKH.jsp" %>"><span>RMS</span> <%= (nvbh != null) ? "Restaurant Sale" : "Restaurant Online" %></a>
     <div class="user-info">
+        <% if (nvbh != null) { %><span>NVBH: <strong><%= FormatUtil.escapeHtml(nvbh.getFullName()) %></strong></span> | <% } %>
         <span>Bàn đã chọn: <strong><%= FormatUtil.escapeHtml(selectedRes.getTable().getTableNumber()) %></strong></span>
         <a href="gdTimBanDat.jsp" class="btn btn-secondary btn-sm">Đổi bàn khác</a>
     </div>
